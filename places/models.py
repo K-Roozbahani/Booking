@@ -3,6 +3,7 @@ from django.utils.translation import gettext_lazy as _
 import datetime
 from users.models import User
 
+
 class LocationType(models.Model):
     title = models.CharField(verbose_name=_('title'), max_length=64)
     is_valid = models.BooleanField(verbose_name=_('is valid'), default=True)
@@ -44,7 +45,7 @@ class Accommodation(models.Model):
     owner = models.ForeignKey(User, models.CASCADE,
                               related_name='Accommodation', verbose_name=_(_('Accommodation'))
                               )
-    # code = id
+    is_valid = models.BooleanField(verbose_name=_('is valid'), default=True)
     base_price = models.FloatField(verbose_name=_('base price'))
     extra_person_price = models.FloatField(verbose_name=_('extra person price'))
     standard_capacity = models.IntegerField(verbose_name=_('standard capacity'))
@@ -60,7 +61,6 @@ class Accommodation(models.Model):
     accommodation_type = models.ManyToManyField(AccommodationType, related_name='accommodation',
                                                 verbose_name=_('accommodation type'))
     description = models.TextField(verbose_name=_('description'))
-
 
     class Meta:
         db_table = 'accommodation'
@@ -118,3 +118,8 @@ class DatePrice(models.Model):
     is_reserve = models.BooleanField(verbose_name=_('is reserve'), default=False)
     date = models.DateField(verbose_name=_('date'))
     price = models.FloatField(verbose_name=_('price'))
+
+    class Meta:
+        db_table = 'date_price'
+        verbose_name = _('date price')
+        verbose_name_plural = _('dates price')
