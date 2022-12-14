@@ -1,8 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-
+import datetime
 from users.models import User
-
 
 class LocationType(models.Model):
     title = models.CharField(verbose_name=_('title'), max_length=64)
@@ -50,6 +49,9 @@ class Accommodation(models.Model):
     extra_person_price = models.FloatField(verbose_name=_('extra person price'))
     standard_capacity = models.IntegerField(verbose_name=_('standard capacity'))
     maximum_capacity = models.IntegerField(verbose_name=_('maximum capacity'))
+    entry_time = models.TimeField(verbose_name=_('entry time'), default=datetime.time(12, 0, 0))
+    exit_time = models.TimeField(verbose_name=_('exit time'), default=datetime.time(14, 0, 0))
+
     area_size = models.IntegerField(verbose_name=_('area size'))
     build_size = models.IntegerField(verbose_name=_('build size'))
     is_charter = models.BooleanField(verbose_name=_('is charter'), default=True)
@@ -58,6 +60,7 @@ class Accommodation(models.Model):
     accommodation_type = models.ManyToManyField(AccommodationType, related_name='accommodation',
                                                 verbose_name=_('accommodation type'))
     description = models.TextField(verbose_name=_('description'))
+
 
     class Meta:
         db_table = 'accommodation'
@@ -107,3 +110,11 @@ class RoomAttribute(Attribute):
         db_table = 'room_attribute'
         verbose_name = _('room attribute')
         verbose_name_plural = _('rooms attribute')
+
+
+class DatePrice(models.Model):
+    accommodation = models.ForeignKey(Accommodation, models.CASCADE, related_name='date_price',
+                                      verbose_name=_('accommodation'))
+    is_reserve = models.BooleanField(verbose_name=_('is reserve'), default=False)
+    date = models.DateField(verbose_name=_('date'))
+    price = models.FloatField(verbose_name=_('price'))
