@@ -2,3 +2,4 @@ Django==4.1.4
 djangorestframework==3.14.0
 django-filter==22.1
 Pillow==9.3.0
+django-cities==0.6.1
