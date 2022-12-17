@@ -6,21 +6,28 @@ from django.utils.translation import gettext_lazy as _
 from users.models import User
 
 
-
 class BaseModel(models.Model):
     title = models.CharField(verbose_name=_('title'), max_length=64)
     is_valid = models.BooleanField(verbose_name=_('is valid'), default=True)
     create_time = models.DateTimeField(verbose_name=_('date join'), auto_now_add=True)
     last_modify = models.DateTimeField(verbose_name=_('last modify'), auto_now=True)
 
+    def __str__(self):
+        return self.title
+
     class Meta:
         abstract = True
 
 
 class DatePrice(models.Model):
+    # currency = models.ForeignKey('Currency', models.CASCADE,
+    #                              related_name=_('%(class)'), verbose_name=_('currency'))
     is_reserve = models.BooleanField(verbose_name=_('is reserve'), default=False)
     date = models.DateField(verbose_name=_('date'))
     price = models.FloatField(verbose_name=_('price'))
+
+    def __str__(self):
+        return str(self.date) + ' ' + str(self.price)  # + str(self.currency)
 
     class Meta:
         abstract = True
@@ -35,7 +42,11 @@ class Attribute(BaseModel):
 
 class Location(models.Model):
     country = models.CharField(verbose_name=_('country'), max_length=64)
+    province = models.CharField(verbose_name=_('province'), max_length=64)
     city = models.CharField(verbose_name=_('city'), max_length=64)
+
+    def __str__(self):
+        return str(self.country) + ' ' + str(self.city)
 
     class Meta:
         db_table = 'location'
@@ -64,6 +75,9 @@ class Place(BaseModel):
     place_type = models.PositiveSmallIntegerField(verbose_name=_('place_type'), choices=PLACE_TYPE)
     description = models.TextField(verbose_name=_('description'))
 
+    def __str__(self):
+        return str(self.title) + ' cod: ' + str(self.id)
+
     class Meta:
         db_table = 'place'
         verbose_name = _('place')
@@ -71,6 +85,7 @@ class Place(BaseModel):
 
 
 class Option(BaseModel):
+    is_free = models.BooleanField(verbose_name=_('is free'), default=True)
     price = models.FloatField(verbose_name=_('price'), default=0)
     place = models.ForeignKey(Place, models.CASCADE, verbose_name=_('place'))
 
@@ -108,6 +123,9 @@ class AccommodationType(BaseModel):
 
 
 class Accommodation(BaseModel):
+
+    place = models.ForeignKey(Place, models.DO_NOTHING, related_name='accommodation',
+                              verbose_name=_('place'), blank=True, null=True)
     owner = models.ForeignKey(User, models.CASCADE,
                               related_name='Accommodation', verbose_name=_(_('Accommodation'))
                               )
@@ -134,13 +152,16 @@ class Accommodation(BaseModel):
 
 
 class Room(BaseModel):
-    Place = models.ForeignKey(Place, models.CASCADE, 'room', parent_link=True, verbose_name=_('room'))
+    place = models.ForeignKey(Place, models.CASCADE, 'room', parent_link=True, verbose_name=_('room'))
     accommodation = models.ForeignKey(Accommodation, models.CASCADE,
                                       related_name='room', verbose_name=_('accommodation'),
                                       blank=True, null=True)
     size = models.IntegerField(verbose_name=_('size'))
     description = models.TextField(verbose_name=_('description'))
     room_type = models.ManyToManyField(RoomType, related_name='room', verbose_name=_('room type'))
+
+    def __str__(self):
+        return 'room ' + str(self.title)
 
     class Meta:
         db_table = 'room'
@@ -180,7 +201,7 @@ class AccommodationDatePrice(DatePrice):
 
 
 class RoomDatePrice(DatePrice):
-    room = models.ForeignKey(Place, models.CASCADE, 'accommodation', verbose_name=_('accommodation'))
+    room = models.ForeignKey(Room, models.CASCADE, 'room_date_price', verbose_name=_('accommodation'))
 
     class Meta:
         db_table = 'room_date_price'
