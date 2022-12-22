@@ -1,3 +1,9 @@
-from django.shortcuts import render
+# from rest_framework import viewsets
+from rest_framework.generics import GenericAPIView, ListAPIView
+from .models import *
+from .serializers import *
 
-# Create your views here.
+
+class AccommodationView(ListAPIView, GenericAPIView):
+    queryset = Accommodation.objects.all()
+    serializer_class = AccommodationSerialize

@@ -96,8 +96,6 @@ class Option(BaseModel):
 
 
 class LocationType(BaseModel):
-    pass
-
     class Meta:
         db_table = 'location_type'
         verbose_name = _('location type')
@@ -105,7 +103,6 @@ class LocationType(BaseModel):
 
 
 class RoomType(BaseModel, models.Model):
-    pass
 
     class Meta:
         db_table = 'room_type'
@@ -114,7 +111,6 @@ class RoomType(BaseModel, models.Model):
 
 
 class AccommodationType(BaseModel):
-    pass
 
     class Meta:
         db_table = 'accommodation_type'
@@ -192,7 +188,7 @@ class RoomAttribute(Attribute):
 
 
 class AccommodationDatePrice(DatePrice):
-    accommodation = models.ForeignKey(Accommodation, models.CASCADE, 'accommodation', verbose_name=_('accommodation'))
+    accommodation = models.ForeignKey(Accommodation, models.CASCADE, 'date_price', verbose_name=_('accommodation'))
 
     class Meta:
         db_table = 'accommodation_date_price'
@@ -201,7 +197,7 @@ class AccommodationDatePrice(DatePrice):
 
 
 class RoomDatePrice(DatePrice):
-    room = models.ForeignKey(Room, models.CASCADE, 'room_date_price', verbose_name=_('accommodation'))
+    room = models.ForeignKey(Room, models.CASCADE, 'date_price', verbose_name=_('accommodation'))
 
     class Meta:
         db_table = 'room_date_price'
