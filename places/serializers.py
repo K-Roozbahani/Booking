@@ -48,20 +48,20 @@ class RoomTypeSerializer(serializers.ModelSerializer):
 class AccommodationDatePriceSerializer(serializers.ModelSerializer):
     class Meta:
         model = AccommodationDatePrice
-        fields = ['date', 'is_reserve', 'price', ]
+        fields = ('date', 'is_reserve', 'price', )
 
 
 class AccommodationSerialize(serializers.ModelSerializer):
     place = PlaceSerializer()
-    location_type = LocationTypeSerializer()
+    location_type = LocationTypeSerializer(many=True)
     accommodation_type = AccommodationTypeSerializer(many=True)
     date_price = AccommodationDatePriceSerializer(many=True)
 
     class Meta:
         model = Accommodation
-        fields = ['title', 'place', 'owner.full_name', 'base_price', 'extra_person_price', 'standard_capacity',
+        fields = ('title', 'place', 'base_price', 'extra_person_price', 'standard_capacity',
                   'maximum_capacity', 'entry_time', 'exit_time', 'area_size', 'build_size', 'is_charter',
-                  'location_type', 'accommodation_type', 'description']
+                  'location_type', 'accommodation_type', 'description', 'date_price')
 
 
 class RoomSerializer(serializers.ModelSerializer):
