@@ -11,14 +11,28 @@ class LocationSerializer(serializers.ModelSerializer):
 
 class PlaceSerializer(serializers.ModelSerializer):
     place_type = serializers.SerializerMethodField()
-
+    price = serializers.SerializerMethodField()
+    location = LocationSerializer()
     class Meta:
         model = Place
-        location = LocationSerializer()
-        fields = '__all__'
+
+        fields = ('title', 'place_type', 'location', 'price', 'description')
 
     def get_place_type(self, obj):
         return obj.get_place_type_display()
+
+    def get_price(self, obj):
+        try:
+            accommodation = obj.accommodation.all().first()
+        except:
+            try:
+                room = obj.room.all().first()
+            except:
+                return None
+            return room.base_price
+        return accommodation.base_price
+
+
 
 
 class OptionSerializer(serializers.ModelSerializer):

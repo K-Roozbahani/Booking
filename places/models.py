@@ -152,9 +152,11 @@ class Room(BaseModel):
     accommodation = models.ForeignKey(Accommodation, models.CASCADE,
                                       related_name='room', verbose_name=_('accommodation'),
                                       blank=True, null=True)
+    is_accommodation = models.BooleanField(verbose_name=_('is accommodation'), default=True)
     size = models.IntegerField(verbose_name=_('size'))
     description = models.TextField(verbose_name=_('description'))
     room_type = models.ManyToManyField(RoomType, related_name='room', verbose_name=_('room type'))
+    base_price = models.FloatField(verbose_name=_('bace price'), null=True, blank=True)
 
     def __str__(self):
         return 'room ' + str(self.title)

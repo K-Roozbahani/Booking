@@ -10,12 +10,6 @@ class AccommodationView(ListAPIView):
     serializer_class = AccommodationSerialize
 
 
-class TestApi(ListAPIView):
-
-    def get(self, request):
-        accommodations = Accommodation.objects.prefetch_related('date_price', 'location_type').all()
-        serializer_class = AccommodationSerialize(many=True, instance=accommodations)
-
-        # date_price = AccommodationDatePriceSerializer(many=True, instance=accommodations.date_price.all())
-        serializer_class.date_price = date_price
-        return Response(serializer_class.data)
+class HomeView(ListAPIView):
+    queryset = Place.objects.all()
+    serializer_class = PlaceSerializer
