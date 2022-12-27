@@ -112,3 +112,13 @@ class PassengerInformation(models.Model):
         db_table = 'passenger_information'
         verbose_name = _('passenger information')
         verbose_name_plural = _('passengers information')
+
+
+class Currency(BaseModel):
+    national_symbol = models.CharField(verbose_name=_('national symbol'), max_length=8, unique=True)
+
+    class Meta:
+        db_table = 'currency'
+        verbose_name = _('currency')
+        verbose_name_plural = _('currencies')
+
