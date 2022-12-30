@@ -15,9 +15,11 @@ def set_currency(currency_key, currency_national_symbol):
     exist = get_currency(currency_key)
     if exist and currency_key == exist:
         print('Redis currency already was update')
-        return False
+        return True
     elif exist:
-        raise ValueError('duplicate value error')
+        print('duplicate value error')
+        return False
     else:
-        redis_cli.hset( hash_name, currency_key,currency_national_symbol)
+        print('add new currency to redis')
+        redis_cli.hset(hash_name, currency_key, currency_national_symbol)
         return True
