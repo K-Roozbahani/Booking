@@ -123,11 +123,7 @@ class Currency(BaseModel):
         verbose_name_plural = _('currencies')
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        self.title = self.title.upper()
         from utils.redis_utils import set_currency
-        try:
-            save_currency_redis = set_currency(self.pk, self.title)
-        except ValueError:
-            print('can not over write currency')
-        if save_currency_redis:
-            super(Currency, self).save(self, force_insert=False, force_update=False, using=None, update_fields=None)
+        self.national_symbol = self.national_symbol.upper()
+        super(Currency, self).save(force_insert, force_update, using, update_fields)
+        set_currency(self.id, self.national_symbol)

@@ -6,7 +6,8 @@ redis_cli = Redis()
 
 def get_currency(currency_id):
     hash_name = settings.REDIS_CURRENCY_HASH_NAME
-    currency = redis_cli.hget(redis_cli, currency_id)
+    print(currency_id, hash_name)
+    currency = redis_cli.hget(hash_name, currency_id)
     return currency
 
 
