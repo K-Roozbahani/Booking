@@ -122,3 +122,6 @@ class Currency(BaseModel):
         verbose_name = _('currency')
         verbose_name_plural = _('currencies')
 
+# class ExchangeCurrency(models.Model):
+#
+#     currency_from = models.PositiveIntegerField(verbose_name=_('currency from'), c)
