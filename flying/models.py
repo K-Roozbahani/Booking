@@ -127,3 +127,17 @@ class Currency(BaseModel):
         self.national_symbol = self.national_symbol.upper()
         super(Currency, self).save(force_insert, force_update, using, update_fields)
         set_currency(self.id, self.national_symbol)
+
+
+class CurrencyExchange(models.Model):
+    from utils.redis_utils import currency_choices
+    CURRENCIES_CHOICES = currency_choices()
+    currency_from = models.PositiveIntegerField(verbose_name=_('currency from'),
+                                                choices=CURRENCIES_CHOICES, default=1)
+    currency_to = models.PositiveIntegerField(verbose_name=_('currency to'), default=1)
+    rate = models.FloatField(verbose_name=_('rate'))
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        from utils.redis_utils import set_rate_currency_exchange
+        super(CurrencyExchange, self).save(force_insert, force_update, using, update_fields)
+        set_rate_currency_exchange(self.currency_from, self.currency_to, self.rate)

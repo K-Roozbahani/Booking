@@ -133,3 +133,4 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 MEDIA_URL = '/media/'
 
 REDIS_CURRENCY_HASH_NAME = "Currencies_symbol"
+REDIS_CURRENCY_EXCHANGE_HASH_NAME = "Exchange_rate"
