@@ -21,7 +21,12 @@ class BaseModel(models.Model):
 
 
 class DatePrice(models.Model):
-    CHOICES_CURRENCY = currency_choices()
+    CURRENCY_IRR = 1
+    CURRENCY_USD = 2
+    CURRENCY_EUR = 3
+    CURRENCY_CAD = 4
+    CHOICES_CURRENCY = ((CURRENCY_IRR, 'IRR'), (CURRENCY_USD, 'USD'), (CURRENCY_EUR, 'EUR'), (CURRENCY_CAD, 'CAD'))
+
     currency = models.PositiveIntegerField(verbose_name=_('currency'), choices=CHOICES_CURRENCY)
     is_reserve = models.BooleanField(verbose_name=_('is reserve'), default=False)
     date = models.DateField(verbose_name=_('date'))
@@ -118,7 +123,11 @@ class AccommodationType(BaseModel):
 
 
 class Accommodation(BaseModel):
-    CHOICES_CURRENCY = currency_choices()
+    CURRENCY_IRR = 1
+    CURRENCY_USD = 2
+    CURRENCY_EUR = 3
+    CURRENCY_CAD = 4
+    CHOICES_CURRENCY = ((CURRENCY_IRR, 'IRR'), (CURRENCY_USD, 'USD'), (CURRENCY_EUR, 'EUR'), (CURRENCY_CAD, 'CAD'))
     place = models.ForeignKey(Place, models.DO_NOTHING, related_name='accommodation',
                               verbose_name=_('place'), blank=True, null=True)
     owner = models.ForeignKey(User, models.CASCADE,
