@@ -1,10 +1,20 @@
 import datetime
 
+from django.core.validators import MaxValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-
+from django.utils import timezone
 from users.models import User
-from utils.redis_utils import currency_choices
+
+
+class Holiday(models.Model):
+    date = models.DateField(verbose_name=_('date'))
+    description = models.CharField(verbose_name=_('description'), default=_('end weak'))
+    last_update = models.DateTimeField(verbose_name=_('last_update'), auto_now=True)
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        super(Holiday, self).save(force_insert, force_update, using, update_fields)
+        # do update redis
 
 
 class BaseModel(models.Model):
@@ -31,6 +41,14 @@ class DatePrice(models.Model):
     is_reserve = models.BooleanField(verbose_name=_('is reserve'), default=False)
     date = models.DateField(verbose_name=_('date'))
     price = models.FloatField(verbose_name=_('price'))
+
+    def is_holiday(self):
+        pass
+
+    def get_price(self):
+        if self.is_holiday():
+            return self.objects.filter(date__gte=timezone.now().date(),
+                                       date__lte=(timezone.now().date() + timezone.timedelta(days=60)))
 
     def __str__(self):
         return str(self.date) + ' ' + str(self.price)  # + str(self.currency)
@@ -157,18 +175,29 @@ class Accommodation(BaseModel):
         verbose_name_plural = _('accommodations')
 
 
-class Room(BaseModel):
-    CHOICES_CURRENCY = currency_choices()
-    place = models.ForeignKey(Place, models.CASCADE, 'room', parent_link=True, verbose_name=_('room'))
+# ___________________________work area ____________________________________________________
+class RoomAccommodation(BaseModel):
     accommodation = models.ForeignKey(Accommodation, models.CASCADE,
                                       related_name='room', verbose_name=_('accommodation'),
                                       blank=True, null=True)
-    is_accommodation = models.BooleanField(verbose_name=_('is accommodation'), default=True)
+    size = models.IntegerField(verbose_name=_('size'), blank=True, null=True)
+    description = models.TextField(verbose_name=_('description'), blank=True, null=True)
+    room_type = models.ForeignKey(RoomType, related_name='room', verbose_name=_('room type'), on_delete=models.CASCADE)
+
+
+class RoomHotel(BaseModel):
+    CURRENCY_IRR = 1
+    CURRENCY_USD = 2
+    CURRENCY_EUR = 3
+    CURRENCY_CAD = 4
+    CHOICES_CURRENCY = ((CURRENCY_IRR, 'IRR'), (CURRENCY_USD, 'USD'), (CURRENCY_EUR, 'EUR'), (CURRENCY_CAD, 'CAD'))
+    place = models.ForeignKey(Place, models.CASCADE, 'room', parent_link=True, verbose_name=_('room'))
     size = models.IntegerField(verbose_name=_('size'))
-    description = models.TextField(verbose_name=_('description'))
-    room_type = models.ManyToManyField(RoomType, related_name='room', verbose_name=_('room type'))
+    description = models.TextField(verbose_name=_('description'), blank=True, null=True)
+    room_type = models.ForeignKey(RoomType, related_name='room', verbose_name=_('room type'), on_delete=models.CASCADE)
     base_price = models.FloatField(verbose_name=_('bace price'), null=True, blank=True)
     currency = models.PositiveIntegerField(verbose_name=_('currency'), choices=CHOICES_CURRENCY)
+    room_star = models.PositiveIntegerField(verbose_name=_('room star'), validators=[MaxValueValidator(5)], default=2)
 
     def __str__(self):
         return 'room ' + str(self.title)
@@ -179,6 +208,7 @@ class Room(BaseModel):
         verbose_name_plural = _('rooms')
 
 
+# ________________________________________work________________________________________
 class AccommodationAttribute(Attribute):
     accommodation = models.ForeignKey(Accommodation, models.CASCADE,
                                       related_name='accommodation_attribute',
@@ -211,7 +241,7 @@ class AccommodationDatePrice(DatePrice):
 
 
 class RoomDatePrice(DatePrice):
-    room = models.ForeignKey(Room, models.CASCADE, 'date_price', verbose_name=_('accommodation'))
+    room = models.ForeignKey('RoomHotel', models.CASCADE, 'date_price', verbose_name=_('accommodation'))
 
     class Meta:
         db_table = 'room_date_price'
