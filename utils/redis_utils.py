@@ -3,7 +3,7 @@ from django.conf import settings
 
 redis_cli = Redis(decode_responses=True)
 hash_currency_name = settings.REDIS_CURRENCY_HASH_NAME
-hash_exchange_currency_name = settings.REDIS_CURRENCY_EXCHANGE_HASH_NAME
+hash_exchange_rate_name = settings.REDIS_EXCHANGE_RATE_HASH_NAME
 
 
 def get_currency(currency_id):
@@ -24,6 +24,7 @@ def set_currency(currency_key, currency_national_symbol):
         redis_cli.hset(hash_currency_name, currency_key, currency_national_symbol)
         return True
 
+
 def currency_choices():
     currencies = redis_cli.hgetall(hash_currency_name)
     list_currencies = []
@@ -33,20 +34,24 @@ def currency_choices():
     return tuple(list_currencies)
 
 
-def set_rate_currency_exchange(currency_from, currency_to, rate):
+def set_exchange_rate(currency_from, currency_to, rate):
     currency_from = str(get_currency(currency_from))
     currency_to = str(get_currency(currency_to))
     key = currency_from + "/" + currency_to
-    redis_cli.hset(hash_exchange_currency_name, key, rate)
-    print('currency exchange rate updated')
+    redis_cli.hset(hash_exchange_rate_name, key, rate)
+    print('Exchange rate updated')
     return True
 
 
-def get_rate_currency_exchange(currency_from, currency_to):
+def get_exchange_rate(currency_from, currency_to):
     key = currency_from + "/" + currency_to
-    rate = redis_cli.hget(hash_exchange_currency_name, key)
+    rate = redis_cli.hget(hash_exchange_rate_name, key)
     if rate:
         return float(rate)
     else:
-        print('currency exchange rate not exist')
-        return False
+        key = currency_to + "/" + currency_from
+        rate = redis_cli.hget(hash_exchange_rate_name, key)
+        if rate:
+            return 1/float(rate)
+        else:
+            return False

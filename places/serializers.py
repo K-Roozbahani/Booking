@@ -13,6 +13,7 @@ class PlaceSerializer(serializers.ModelSerializer):
     place_type = serializers.SerializerMethodField()
     price = serializers.SerializerMethodField()
     location = LocationSerializer()
+
     class Meta:
         model = Place
 
@@ -33,36 +34,47 @@ class PlaceSerializer(serializers.ModelSerializer):
         return accommodation.base_price
 
 
-
-
 class OptionSerializer(serializers.ModelSerializer):
+    place = PlaceSerializer()
+
     class Meta:
         model = Option
-        fields = '__all__'
+        fields = ('title', 'is_free', 'price', 'place')
 
 
 class LocationTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = LocationType
-        fields = '__all__'
+        fields = ('title',)
 
 
 class AccommodationTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = AccommodationType
-        fields = '__all__'
+        fields = ('title',)
 
 
 class RoomTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = RoomType
-        fields = '__all__'
+        fields = 'title'
 
 
 class AccommodationDatePriceSerializer(serializers.ModelSerializer):
     class Meta:
         model = AccommodationDatePrice
-        fields = ('date', 'is_reserve', 'price', )
+        fields = ('date', 'is_reserve', 'price',)
+
+
+class AccommodationListSerializer(serializers.ListSerializer):
+    place = PlaceSerializer()
+    location_type = LocationTypeSerializer(many=True)
+    accommodation_type = AccommodationTypeSerializer(many=True)
+    date_price = AccommodationDatePriceSerializer(many=True)
+
+    class Meta:
+        model = Accommodation
+        fields = ('title', 'place', 'maximum_capacity', 'location_type', 'accommodation_type')
 
 
 class AccommodationSerialize(serializers.ModelSerializer):
@@ -76,6 +88,7 @@ class AccommodationSerialize(serializers.ModelSerializer):
         fields = ('title', 'place', 'base_price', 'extra_person_price', 'standard_capacity',
                   'maximum_capacity', 'entry_time', 'exit_time', 'area_size', 'build_size', 'is_charter',
                   'location_type', 'accommodation_type', 'description', 'date_price')
+        list_serializer_class = AccommodationListSerializer
 
 
 class RoomSerializer(serializers.ModelSerializer):

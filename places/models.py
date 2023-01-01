@@ -4,6 +4,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from users.models import User
+from utils.redis_utils import currency_choices
 
 
 class BaseModel(models.Model):
@@ -20,8 +21,8 @@ class BaseModel(models.Model):
 
 
 class DatePrice(models.Model):
-    # currency = models.ForeignKey('Currency', models.CASCADE,
-    #                              related_name=_('%(class)'), verbose_name=_('currency'))
+    CHOICES_CURRENCY = currency_choices()
+    currency = models.PositiveIntegerField(verbose_name=_('currency'), choices=CHOICES_CURRENCY)
     is_reserve = models.BooleanField(verbose_name=_('is reserve'), default=False)
     date = models.DateField(verbose_name=_('date'))
     price = models.FloatField(verbose_name=_('price'))
@@ -103,7 +104,6 @@ class LocationType(BaseModel):
 
 
 class RoomType(BaseModel, models.Model):
-
     class Meta:
         db_table = 'room_type'
         verbose_name = _('room type')
@@ -111,7 +111,6 @@ class RoomType(BaseModel, models.Model):
 
 
 class AccommodationType(BaseModel):
-
     class Meta:
         db_table = 'accommodation_type'
         verbose_name = _('accommodation type')
@@ -119,13 +118,15 @@ class AccommodationType(BaseModel):
 
 
 class Accommodation(BaseModel):
-
+    CHOICES_CURRENCY = currency_choices()
     place = models.ForeignKey(Place, models.DO_NOTHING, related_name='accommodation',
                               verbose_name=_('place'), blank=True, null=True)
     owner = models.ForeignKey(User, models.CASCADE,
                               related_name='Accommodation', verbose_name=_(_('Accommodation'))
                               )
     base_price = models.FloatField(verbose_name=_('base price'))
+
+    currency = models.PositiveIntegerField(verbose_name=_('currency'), choices=CHOICES_CURRENCY)
     extra_person_price = models.FloatField(verbose_name=_('extra person price'))
     standard_capacity = models.IntegerField(verbose_name=_('standard capacity'))
     maximum_capacity = models.IntegerField(verbose_name=_('maximum capacity'))
@@ -148,6 +149,7 @@ class Accommodation(BaseModel):
 
 
 class Room(BaseModel):
+    CHOICES_CURRENCY = currency_choices()
     place = models.ForeignKey(Place, models.CASCADE, 'room', parent_link=True, verbose_name=_('room'))
     accommodation = models.ForeignKey(Accommodation, models.CASCADE,
                                       related_name='room', verbose_name=_('accommodation'),
@@ -157,6 +159,7 @@ class Room(BaseModel):
     description = models.TextField(verbose_name=_('description'))
     room_type = models.ManyToManyField(RoomType, related_name='room', verbose_name=_('room type'))
     base_price = models.FloatField(verbose_name=_('bace price'), null=True, blank=True)
+    currency = models.PositiveIntegerField(verbose_name=_('currency'), choices=CHOICES_CURRENCY)
 
     def __str__(self):
         return 'room ' + str(self.title)

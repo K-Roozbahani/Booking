@@ -138,6 +138,6 @@ class CurrencyExchange(models.Model):
     rate = models.FloatField(verbose_name=_('rate'))
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        from utils.redis_utils import set_rate_currency_exchange
+        from utils.redis_utils import set_exchange_rate
         super(CurrencyExchange, self).save(force_insert, force_update, using, update_fields)
-        set_rate_currency_exchange(self.currency_from, self.currency_to, self.rate)
+        set_exchange_rate(self.currency_from, self.currency_to, self.rate)
