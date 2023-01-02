@@ -1,7 +1,8 @@
 from django.contrib import admin
 from .models import (Location, Place, LocationType, RoomType, AccommodationType,
-                     Accommodation, Room, AccommodationAttribute,
-                     RoomAttribute, DatePrice, AccommodationDatePrice, RoomDatePrice)
+                     Accommodation, AccommodationRoom, AccommodationAttribute,
+                     HotelRoomAttribute, AccommodationRoomAttribute,
+                     DatePrice, AccommodationDatePrice, RoomDatePrice)
 
 
 @admin.register(Location)
@@ -50,8 +51,8 @@ class AccommodationAdmin(admin.ModelAdmin):
                    'standard_capacity', 'maximum_capacity']
 
 
-@admin.register(Room)
-class RoomAdmin(admin.ModelAdmin):
+@admin.register(AccommodationRoom)
+class RoomAccommodationAdmin(admin.ModelAdmin):
     list_display = ['id', 'title', 'accommodation']
 
 
@@ -60,9 +61,14 @@ class AccommodationAttributeAdmin(admin.ModelAdmin):
     model = AccommodationAttribute
 
 
-@admin.register(RoomAttribute)
+@admin.register(HotelRoomAttribute)
 class RoomAttributeAdmin(admin.ModelAdmin):
-    model = RoomAttribute
+    model = HotelRoomAttribute
+
+
+@admin.register(AccommodationRoomAttribute)
+class RoomAttributeAdmin(admin.ModelAdmin):
+    model = AccommodationRoomAttribute
 
 
 @admin.register(AccommodationDatePrice)

@@ -134,3 +134,4 @@ MEDIA_URL = '/media/'
 
 REDIS_CURRENCY_HASH_NAME = "Currencies_symbol"
 REDIS_EXCHANGE_RATE_HASH_NAME = "Exchange_rate"
+# REDIS_HOLIDAYS_HASH_NAME = "Holidays"

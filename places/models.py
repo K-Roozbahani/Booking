@@ -7,14 +7,32 @@ from django.utils import timezone
 from users.models import User
 
 
+class DateFilterManager(models.Manager):
+    def get_queryset(self):
+        now = timezone.now().date()
+        next_date = now
+        next_date.month += 2
+        next_date.day = 1
+        return super(DateFilterManager, self).get_queryset().filter(date__gte=now, date__lt=next_date)
+
+
 class Holiday(models.Model):
     date = models.DateField(verbose_name=_('date'))
-    description = models.CharField(verbose_name=_('description'), default=_('end weak'))
+    description = models.CharField(verbose_name=_('description'), default=_('end weak'), max_length=64)
     last_update = models.DateTimeField(verbose_name=_('last_update'), auto_now=True)
+    objects = models.Manager()
+    holiday_list = DateFilterManager()
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        super(Holiday, self).save(force_insert, force_update, using, update_fields)
-        # do update redis
+    @classmethod
+    def holidays_list(cls):
+        holidays = cls.holiday_list.all()
+        timezone_list = [holiday.date for holiday in holidays]
+        return timezone_list
+
+    class Meta:
+        db_table = 'holidays'
+        verbose_name = _('holiday')
+        verbose_name_plural = _('holidays')
 
 
 class BaseModel(models.Model):
@@ -41,14 +59,37 @@ class DatePrice(models.Model):
     is_reserve = models.BooleanField(verbose_name=_('is reserve'), default=False)
     date = models.DateField(verbose_name=_('date'))
     price = models.FloatField(verbose_name=_('price'))
+    objects = models.Manager()
+    date_price_list = DateFilterManager()
 
     def is_holiday(self):
-        pass
+        if self.date in Holiday.holidays_list():
+            return True
+        else:
+            return False
 
     def get_price(self):
-        if self.is_holiday():
-            return self.objects.filter(date__gte=timezone.now().date(),
-                                       date__lte=(timezone.now().date() + timezone.timedelta(days=60)))
+        return self.date_price_list.all()
+
+    def auto_set_price(self, base_price, vacation_price, currency, *args, **kwargs):
+        now = timezone.now().date()
+        next_date = now
+        next_date.month += 2
+        next_date.day = 1
+        date_prices = []
+        while now < next_date:
+            date_price = self
+            date_price.date = now
+            date_price.currency = currency
+            if date_price.is_holiday():
+                date_price.price = vacation_price
+            else:
+                date_price.price = base_price
+            date_prices.append(date_price)
+        try:
+            self.objects.bulk_create(date_prices)
+        except:
+            print('sorry cant create date_prices')
 
     def __str__(self):
         return str(self.date) + ' ' + str(self.price)  # + str(self.currency)
@@ -93,7 +134,7 @@ class Place(BaseModel):
                   (ROOM_TYPE, _('room'))
                   )
 
-    location = models.ForeignKey(Location, models.DO_NOTHING, related_name='place',
+    location = models.ForeignKey(Location, models.DO_NOTHING, related_name='place_location',
                                  verbose_name=_('location'))
     address = models.TextField(verbose_name=_("address"))
     place_type = models.PositiveSmallIntegerField(verbose_name=_('place_type'), choices=PLACE_TYPE)
@@ -103,15 +144,15 @@ class Place(BaseModel):
         return str(self.title) + ' cod: ' + str(self.id)
 
     class Meta:
-        db_table = 'place'
-        verbose_name = _('place')
-        verbose_name_plural = _('places')
+        db_table = 'Place'
+        verbose_name = _('Place')
+        verbose_name_plural = _('Places')
 
 
 class Option(BaseModel):
     is_free = models.BooleanField(verbose_name=_('is free'), default=True)
     price = models.FloatField(verbose_name=_('price'), default=0)
-    place = models.ForeignKey(Place, models.CASCADE, verbose_name=_('place'))
+    place = models.ForeignKey(Place, models.CASCADE, related_name='options', verbose_name=_('place'))
 
     class Meta:
         db_table = 'option'
@@ -175,26 +216,33 @@ class Accommodation(BaseModel):
         verbose_name_plural = _('accommodations')
 
 
-# ___________________________work area ____________________________________________________
-class RoomAccommodation(BaseModel):
+class AccommodationRoom(BaseModel):
     accommodation = models.ForeignKey(Accommodation, models.CASCADE,
                                       related_name='room', verbose_name=_('accommodation'),
                                       blank=True, null=True)
     size = models.IntegerField(verbose_name=_('size'), blank=True, null=True)
     description = models.TextField(verbose_name=_('description'), blank=True, null=True)
-    room_type = models.ForeignKey(RoomType, related_name='room', verbose_name=_('room type'), on_delete=models.CASCADE)
+    room_type = models.ForeignKey(RoomType, related_name='accommodation_room', verbose_name=_('room_type'),
+                                  on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'accommodation_room'
+        verbose_name = _('accommodation room')
+        verbose_name_plural = _('accommodations room')
 
 
-class RoomHotel(BaseModel):
+class HotelRoom(BaseModel):
     CURRENCY_IRR = 1
     CURRENCY_USD = 2
     CURRENCY_EUR = 3
     CURRENCY_CAD = 4
     CHOICES_CURRENCY = ((CURRENCY_IRR, 'IRR'), (CURRENCY_USD, 'USD'), (CURRENCY_EUR, 'EUR'), (CURRENCY_CAD, 'CAD'))
-    place = models.ForeignKey(Place, models.CASCADE, 'room', parent_link=True, verbose_name=_('room'))
+    place = models.ForeignKey(Place, models.CASCADE, related_name='hotel_room', verbose_name=_('place'))
+    room_number = models.PositiveIntegerField(verbose_name=_('room number'))
     size = models.IntegerField(verbose_name=_('size'))
     description = models.TextField(verbose_name=_('description'), blank=True, null=True)
-    room_type = models.ForeignKey(RoomType, related_name='room', verbose_name=_('room type'), on_delete=models.CASCADE)
+    room_type = models.ForeignKey(RoomType, related_name='hotel_room', verbose_name=_('room_type'),
+                                  on_delete=models.CASCADE)
     base_price = models.FloatField(verbose_name=_('bace price'), null=True, blank=True)
     currency = models.PositiveIntegerField(verbose_name=_('currency'), choices=CHOICES_CURRENCY)
     room_star = models.PositiveIntegerField(verbose_name=_('room star'), validators=[MaxValueValidator(5)], default=2)
@@ -203,9 +251,9 @@ class RoomHotel(BaseModel):
         return 'room ' + str(self.title)
 
     class Meta:
-        db_table = 'room'
-        verbose_name = _('room')
-        verbose_name_plural = _('rooms')
+        db_table = 'hotel_room'
+        verbose_name = _('hotel_room')
+        verbose_name_plural = _('hotels_rooms')
 
 
 # ________________________________________work________________________________________
@@ -220,15 +268,26 @@ class AccommodationAttribute(Attribute):
         verbose_name_plural = _('accommodations attribute')
 
 
-class RoomAttribute(Attribute):
-    room = models.ForeignKey(Accommodation, models.CASCADE,
-                             related_name='room_attribute',
+class HotelRoomAttribute(Attribute):
+    room = models.ForeignKey(HotelRoom, models.CASCADE,
+                             related_name='hotel_room_attribute',
+                             verbose_name=_('room'))
+
+    class Meta:
+        db_table = 'hotel_room_attribute'
+        verbose_name = _('hotel room attribute')
+        verbose_name_plural = _('hotels room attribute')
+
+
+class AccommodationRoomAttribute(Attribute):
+    room = models.ForeignKey(AccommodationRoom, models.CASCADE,
+                             related_name='accommodation_room_attribute',
                              verbose_name=_('room'))
 
     class Meta:
         db_table = 'room_attribute'
-        verbose_name = _('room attribute')
-        verbose_name_plural = _('rooms attribute')
+        verbose_name = _('accommodation room attribute')
+        verbose_name_plural = _('accommodations rooms attribute')
 
 
 class AccommodationDatePrice(DatePrice):
@@ -239,11 +298,15 @@ class AccommodationDatePrice(DatePrice):
         verbose_name = _('accommodation date price')
         verbose_name_plural = _('accommodation dates price')
 
+    # ---------------------- auto_create --------------------
+
 
 class RoomDatePrice(DatePrice):
-    room = models.ForeignKey('RoomHotel', models.CASCADE, 'date_price', verbose_name=_('accommodation'))
+    room = models.ForeignKey(HotelRoom, models.CASCADE, 'date_price', verbose_name=_('accommodation'))
 
     class Meta:
         db_table = 'room_date_price'
         verbose_name = _('room date price')
         verbose_name_plural = _('rooms dates price')
+
+    # -------------------------- auto_create ----------------
