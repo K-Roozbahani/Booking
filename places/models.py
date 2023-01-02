@@ -246,9 +246,10 @@ class HotelRoom(BaseModel):
     base_price = models.FloatField(verbose_name=_('bace price'), null=True, blank=True)
     currency = models.PositiveIntegerField(verbose_name=_('currency'), choices=CHOICES_CURRENCY)
     room_star = models.PositiveIntegerField(verbose_name=_('room star'), validators=[MaxValueValidator(5)], default=2)
+    capacity = models.PositiveSmallIntegerField(verbose_name=_('capacity'), default=2)
 
     def __str__(self):
-        return 'room ' + str(self.title)
+        return str(self.title)
 
     class Meta:
         db_table = 'hotel_room'
@@ -256,7 +257,6 @@ class HotelRoom(BaseModel):
         verbose_name_plural = _('hotels_rooms')
 
 
-# ________________________________________work________________________________________
 class AccommodationAttribute(Attribute):
     accommodation = models.ForeignKey(Accommodation, models.CASCADE,
                                       related_name='accommodation_attribute',
@@ -298,15 +298,13 @@ class AccommodationDatePrice(DatePrice):
         verbose_name = _('accommodation date price')
         verbose_name_plural = _('accommodation dates price')
 
-    # ---------------------- auto_create --------------------
 
-
-class RoomDatePrice(DatePrice):
+class HotelRoomDatePrice(DatePrice):
     room = models.ForeignKey(HotelRoom, models.CASCADE, 'date_price', verbose_name=_('accommodation'))
 
     class Meta:
-        db_table = 'room_date_price'
-        verbose_name = _('room date price')
-        verbose_name_plural = _('rooms dates price')
+        db_table = 'hotel_room_date_price'
+        verbose_name = _('hotel room date price')
+        verbose_name_plural = _('hotel rooms dates price')
 
-    # -------------------------- auto_create ----------------
+

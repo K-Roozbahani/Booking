@@ -1,8 +1,15 @@
 from django.contrib import admin
-from .models import (Location, Place, LocationType, RoomType, AccommodationType,
-                     Accommodation, AccommodationRoom, AccommodationAttribute,
+from .models import (Holiday, Location, Place, Option, LocationType, RoomType, AccommodationType,
+                     Accommodation, AccommodationRoom, HotelRoom, AccommodationAttribute,
                      HotelRoomAttribute, AccommodationRoomAttribute,
-                     DatePrice, AccommodationDatePrice, RoomDatePrice)
+                     AccommodationDatePrice, HotelRoomDatePrice)
+
+
+@admin.register(Holiday)
+class HolidayAdmin(admin.ModelAdmin):
+    model = Holiday
+    list_display = ['date', 'description']
+    search_fields = ['date']
 
 
 @admin.register(Location)
@@ -20,9 +27,23 @@ class LocationTypeAdmin(admin.ModelAdmin):
     list_display = ['id', 'title', 'is_valid']
 
 
+class OptionTabularInline(admin.TabularInline):
+    model = Option
+    fields = ['title', 'is_free', 'price']
+    extra = 0
+
+
+class HotelRoomTabularInline(admin.TabularInline):
+    model = HotelRoom
+    readonly_fields = fields = ('room_number', 'size', 'room_type', 'room_star',
+                                'capacity', 'currency', 'price', 'description')
+    extra = 0
+
+
 @admin.register(Place)
 class PlaceAdmin(admin.ModelAdmin):
     model = Place
+    inlines = [OptionTabularInline, HotelRoomTabularInline]
     list_display = ['id', 'title', 'location', 'place_type']
     list_filter = ['id', 'title', 'location']
     search_fields = ['id', 'title']
@@ -42,18 +63,20 @@ class AccommodationTypeAdmin(admin.ModelAdmin):
     list_display = ['id', 'title']
 
 
+class AccommodationRoomTabularInline(admin.TabularInline):
+    model = AccommodationRoom
+    fields = ['title', 'room_type', 'size', 'description']
+    extra = 0
+
+
 @admin.register(Accommodation)
 class AccommodationAdmin(admin.ModelAdmin):
     model = Accommodation
     search_fields = ['title']
-    list_display = ['id', 'title', 'base_price', 'owner', 'standard_capacity', 'build_size']
+    list_display = ['id', 'title', 'base_price', 'place', 'standard_capacity', 'build_size']
     list_filter = ['owner', 'location_type', 'accommodation_type',
                    'standard_capacity', 'maximum_capacity']
-
-
-@admin.register(AccommodationRoom)
-class RoomAccommodationAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'accommodation']
+    inlines = [AccommodationRoomTabularInline]
 
 
 @admin.register(AccommodationAttribute)
@@ -76,6 +99,6 @@ class AccommodationDatePriceAdmin(admin.ModelAdmin):
     model = AccommodationDatePrice
 
 
-@admin.register(RoomDatePrice)
+@admin.register(HotelRoomDatePrice)
 class RoomDatePriceAdmin(admin.ModelAdmin):
-    model = RoomDatePrice
+    model = HotelRoomDatePrice
