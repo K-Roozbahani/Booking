@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'users',
     'places',
     'flying',
+    'carts',
 ]
 
 MIDDLEWARE = [
