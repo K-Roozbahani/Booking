@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework_simplejwt',
     'rest_framework',
     'users',
     'places',
@@ -135,3 +136,10 @@ MEDIA_URL = '/media/'
 REDIS_CURRENCY_HASH_NAME = "Currencies_symbol"
 REDIS_EXCHANGE_RATE_HASH_NAME = "Exchange_rate"
 # REDIS_HOLIDAYS_HASH_NAME = "Holidays"
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
