@@ -35,8 +35,8 @@ class OptionTabularInline(admin.TabularInline):
 
 class HotelRoomTabularInline(admin.TabularInline):
     model = HotelRoom
-    readonly_fields = fields = ('room_number', 'size', 'room_type', 'room_star',
-                                'capacity', 'currency', 'price', 'description')
+    fields = ('room_number', 'size', 'room_type', 'room_star',
+              'capacity', 'currency', 'base_price', 'description')
     extra = 0
 
 
@@ -69,6 +69,20 @@ class AccommodationRoomTabularInline(admin.TabularInline):
     extra = 0
 
 
+@admin.register(AccommodationAttribute)
+class AccommodationAttributeAdmin(admin.ModelAdmin):
+    model = AccommodationAttribute
+    list_display = ('title', 'description')
+    search_fields = ('title',)
+    extra = 0
+
+
+class AccommodationDatePriceTabularInline(admin.TabularInline):
+    model = AccommodationDatePrice
+    fields = ('date', 'is_reserve', 'price', 'currency',)
+    extra = 0
+
+
 @admin.register(Accommodation)
 class AccommodationAdmin(admin.ModelAdmin):
     model = Accommodation
@@ -76,29 +90,32 @@ class AccommodationAdmin(admin.ModelAdmin):
     list_display = ['id', 'title', 'base_price', 'place', 'standard_capacity', 'build_size']
     list_filter = ['owner', 'location_type', 'accommodation_type',
                    'standard_capacity', 'maximum_capacity']
-    inlines = [AccommodationRoomTabularInline]
+    inlines = [AccommodationRoomTabularInline, AccommodationDatePriceTabularInline]
 
 
-@admin.register(AccommodationAttribute)
-class AccommodationAttributeAdmin(admin.ModelAdmin):
-    model = AccommodationAttribute
+# @admin.register(AccommodationAttribute)
+# class AccommodationAttributeAdmin(admin.ModelAdmin):
+#     model = AccommodationAttribute
 
 
 @admin.register(HotelRoomAttribute)
-class RoomAttributeAdmin(admin.ModelAdmin):
+class HotelRoomAttributeAdmin(admin.ModelAdmin):
     model = HotelRoomAttribute
+    search_fields = ['title']
 
 
 @admin.register(AccommodationRoomAttribute)
 class RoomAttributeAdmin(admin.ModelAdmin):
     model = AccommodationRoomAttribute
+    search_fields = ['title']
 
 
-@admin.register(AccommodationDatePrice)
-class AccommodationDatePriceAdmin(admin.ModelAdmin):
-    model = AccommodationDatePrice
-
-
-@admin.register(HotelRoomDatePrice)
-class RoomDatePriceAdmin(admin.ModelAdmin):
+class HotelRoomDatePriceTabularInline(admin.TabularInline):
     model = HotelRoomDatePrice
+    fields = ('date', 'is_reserve', 'price', 'currency')
+
+
+class HotelRoomAdmin(admin.ModelAdmin):
+    model = HotelRoom
+    search_fields = ['place__location__city']
+    inlines = [HotelRoomDatePriceTabularInline]

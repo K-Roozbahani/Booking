@@ -25,13 +25,17 @@ class PlaceSerializer(serializers.ModelSerializer):
     def get_price(self, obj):
         try:
             accommodation = obj.accommodation.all().first()
+            print(f'STEP 1 {accommodation}')
+
+            room = obj.hotel_room.all().first()
+            print(f'ERROR 1 {room}')
+            if room:
+                return room.base_price
+            elif accommodation:
+                return accommodation.base_price
         except:
-            try:
-                room = obj.room.all().first()
-            except:
-                return None
-            return room.base_price
-        return accommodation.base_price
+            print('ERROR 2')
+            return None
 
 
 class OptionSerializer(serializers.ModelSerializer):

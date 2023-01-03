@@ -138,7 +138,7 @@ class Place(BaseModel):
                                  verbose_name=_('location'))
     address = models.TextField(verbose_name=_("address"))
     place_type = models.PositiveSmallIntegerField(verbose_name=_('place_type'), choices=PLACE_TYPE)
-    description = models.TextField(verbose_name=_('description'))
+    description = models.TextField(verbose_name=_('description'), null=True, blank=True)
 
     def __str__(self):
         return str(self.title) + ' cod: ' + str(self.id)
@@ -158,6 +158,27 @@ class Option(BaseModel):
         db_table = 'option'
         verbose_name = _('option')
         verbose_name_plural = _('options')
+
+
+class AccommodationAttribute(Attribute):
+    class Meta:
+        db_table = 'accommodation_attributes'
+        verbose_name = _('accommodation attribute')
+        verbose_name_plural = _('accommodations attribute')
+
+
+class HotelRoomAttribute(Attribute):
+    class Meta:
+        db_table = 'hotel_room_attributes'
+        verbose_name = _('hotel room attribute')
+        verbose_name_plural = _('hotels room attribute')
+
+
+class AccommodationRoomAttribute(Attribute):
+    class Meta:
+        db_table = 'room_attributes'
+        verbose_name = _('accommodation room attribute')
+        verbose_name_plural = _('accommodations rooms attribute')
 
 
 class LocationType(BaseModel):
@@ -208,6 +229,8 @@ class Accommodation(BaseModel):
                                            verbose_name=_('location type'))
     accommodation_type = models.ManyToManyField(AccommodationType, related_name='accommodation',
                                                 verbose_name=_('accommodation type'))
+    attribute = models.ManyToManyField(AccommodationAttribute,
+                                       related_name='accommodation', verbose_name=_('attribute'))
     description = models.TextField(verbose_name=_('description'))
 
     class Meta:
@@ -224,6 +247,8 @@ class AccommodationRoom(BaseModel):
     description = models.TextField(verbose_name=_('description'), blank=True, null=True)
     room_type = models.ForeignKey(RoomType, related_name='accommodation_room', verbose_name=_('room_type'),
                                   on_delete=models.CASCADE)
+    attribute = models.ManyToManyField(AccommodationRoomAttribute, related_name='accommodation_room',
+                                       verbose_name=_('attribute'))
 
     class Meta:
         db_table = 'accommodation_room'
@@ -247,6 +272,7 @@ class HotelRoom(BaseModel):
     currency = models.PositiveIntegerField(verbose_name=_('currency'), choices=CHOICES_CURRENCY)
     room_star = models.PositiveIntegerField(verbose_name=_('room star'), validators=[MaxValueValidator(5)], default=2)
     capacity = models.PositiveSmallIntegerField(verbose_name=_('capacity'), default=2)
+    attribute = models.ManyToManyField(HotelRoomAttribute, 'hotel_room', verbose_name=_('attribute'))
 
     def __str__(self):
         return str(self.title)
@@ -255,39 +281,6 @@ class HotelRoom(BaseModel):
         db_table = 'hotel_room'
         verbose_name = _('hotel_room')
         verbose_name_plural = _('hotels_rooms')
-
-
-class AccommodationAttribute(Attribute):
-    accommodation = models.ForeignKey(Accommodation, models.CASCADE,
-                                      related_name='accommodation_attribute',
-                                      verbose_name=_('accommodation'))
-
-    class Meta:
-        db_table = 'accommodation_attribute'
-        verbose_name = _('accommodation attribute')
-        verbose_name_plural = _('accommodations attribute')
-
-
-class HotelRoomAttribute(Attribute):
-    room = models.ForeignKey(HotelRoom, models.CASCADE,
-                             related_name='hotel_room_attribute',
-                             verbose_name=_('room'))
-
-    class Meta:
-        db_table = 'hotel_room_attribute'
-        verbose_name = _('hotel room attribute')
-        verbose_name_plural = _('hotels room attribute')
-
-
-class AccommodationRoomAttribute(Attribute):
-    room = models.ForeignKey(AccommodationRoom, models.CASCADE,
-                             related_name='accommodation_room_attribute',
-                             verbose_name=_('room'))
-
-    class Meta:
-        db_table = 'room_attribute'
-        verbose_name = _('accommodation room attribute')
-        verbose_name_plural = _('accommodations rooms attribute')
 
 
 class AccommodationDatePrice(DatePrice):
@@ -306,5 +299,3 @@ class HotelRoomDatePrice(DatePrice):
         db_table = 'hotel_room_date_price'
         verbose_name = _('hotel room date price')
         verbose_name_plural = _('hotel rooms dates price')
-
-
