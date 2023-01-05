@@ -21,6 +21,7 @@ def taking_order(request):
     date_prices = None
     order = None
     serializer = None
+    # print(pk, user, start_date, end_date, order_type)
     if order_type == 1:
         place = Place.objects.get(pk=pk)
         date_prices = HotelRoomDatePrice.objects.filter(Q(palce=place), Q(date__gte=start_date), Q(date__lte=end_date))
@@ -28,15 +29,23 @@ def taking_order(request):
         order = HotelRoomOrder(place=place, user=user, status=1)
 
     elif order_type == 2:
+        # print('-'*10)
         accommodation = Accommodation.objects.get(pk=pk)
+        # print('1'*10)
         date_prices = AccommodationDatePrice.objects.filter(Q(accommodation=accommodation),
                                                             Q(date__gte=start_date), Q(date__lte=end_date))
+        # print('2'*10)
         serializer = AccommodationOrderSerializer()
+        # print('3'*10)
         order = AccommodationOrder(accommodation=accommodation, user=user, status=1)
+        # print('4'*10)
 
     order.save()
+    # print('5'*10)
     order.date_prices.set(date_prices)
+    # print('6'*10)
     serializer.instance = order
+    # print('7'*10)
     return {'order': order, 'serializer': serializer}
 
 
@@ -49,7 +58,7 @@ def reserve_date_price(order):
 
 
 def get_all_or_one_order(request, pk=None):
-    print('-' * 20)
+    # print('-' * 20)
     if pk or 0:
         order_type = int(request.GET.get('type'))
         print(type(order_type))
@@ -67,7 +76,7 @@ def get_all_or_one_order(request, pk=None):
             return accommodation_order_serializer.data
 
     elif not pk:
-        print('*' * 20)
+        # print('*' * 20)
         user = request.user
         accommodation_orders = AccommodationOrder.objects.filter(user=user)
         accommodation_order_serializer = AccommodationOrderSerializer(accommodation_orders, many=True)
@@ -84,3 +93,23 @@ def get_all_or_one_order(request, pk=None):
 
 def validate_payment(secure_date):
     return secure_date
+
+
+def get_object_order(reqeust, pk):
+    # print('-'*10)
+    if pk:
+        order_type = int(reqeust.GET.get('type'))
+        # print('1'*10)
+        if order_type == 1:
+            return HotelRoomOrder.objects.get(pk=pk)
+
+        elif order_type == 2:
+            # print('2'*10)
+            return AccommodationOrder.objects.get(pk=pk)
+        # print('3'*10)
+    else:
+        order_type = int(reqeust.GET.get('type'))
+        if order_type == 1:
+            return AccommodationOrder.objects.all()
+        elif order_type == 2:
+            return HotelRoomOrder.objects.all()

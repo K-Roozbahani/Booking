@@ -1,6 +1,7 @@
 from rest_framework.generics import GenericAPIView, ListAPIView, RetrieveAPIView, CreateAPIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-from .utils import taking_order, reserve_date_price, get_all_or_one_order, validate_payment
+from .utils import taking_order, reserve_date_price, get_all_or_one_order, validate_payment, get_object_order
 from places.models import HotelRoomDatePrice, AccommodationDatePrice
 from .serializers import HotelRoomOrderSerializer, AccommodationOrderSerializer
 from .models import AccommodationOrder, HotelRoomOrder
@@ -11,6 +12,7 @@ from django.utils.translation import gettext_lazy as _
 
 
 class ReserveViewSet(APIView):
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         try:
@@ -36,11 +38,10 @@ class ReserveViewSet(APIView):
 
 
 class PaymentView(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request, pk):
         try:
-            print(pk)
-            print(type(pk))
-            order = AccommodationOrder.objects.get(pk=pk)
+            order = get_object_order(request, pk)
         except:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 

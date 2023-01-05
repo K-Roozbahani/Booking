@@ -18,6 +18,8 @@ class OrderBace(models.Model):
               (STATUS_PAID, _('paid')), (STATUS_PAYMENT_FAILED, _('payment failed')))
     user = models.ForeignKey(User, models.CASCADE, verbose_name=_('user'))
     status = models.PositiveSmallIntegerField(verbose_name=_('status'), choices=STATUS, default=0)
+    create_date = models.DateTimeField(verbose_name=_('create_date'), auto_now_add=True)
+    update_date = models.DateTimeField(verbose_name=_('update date'), auto_now=True)
 
     class Meta:
         abstract = True
@@ -89,6 +91,7 @@ class AccommodationOrder(PlaceOrderBace):
     accommodation = models.ForeignKey(Accommodation, models.CASCADE, 'orders', verbose_name=_('accommodation'))
     date_prices = models.ManyToManyField(AccommodationDatePrice,
                                          related_name='accommodation_orders', verbose_name=_('date price'))
+
     class Meta:
         db_table = 'accommodation_orders'
         verbose_name = 'accommodation order'
