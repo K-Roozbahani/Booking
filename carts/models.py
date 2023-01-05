@@ -47,7 +47,7 @@ class PlaceOrderBace(OrderBace):
         return order_date_maximum['end_date']
 
     def is_free(self):
-        reserve_date = self.date_prices.filter(date__qte=self.start_date_reserve,
+        reserve_date = self.date_prices.filter(date__gte=self.start_date_reserve,
                                                date__lte=self.end_date_reserve,
                                                is_reserve=True).count()
         if reserve_date == 0:

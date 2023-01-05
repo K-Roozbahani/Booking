@@ -5,7 +5,6 @@ from django.db.models import Q
 from django.utils import timezone
 
 
-
 def get_date(str_time, format_time="%Y-%m-%d"):
     new_datetime = timezone.datetime.strptime(str_time, format_time)
     return new_datetime.date()
@@ -46,4 +45,42 @@ def reserve_date_price(order):
     for date in date_prices:
         date.is_reserve = True
 
-    return date_prices.objects.bulk_update(date_prices, ['is_reserve'])
+    return date_prices.bulk_update(date_prices, ['is_reserve'])
+
+
+def get_all_or_one_order(request, pk=None):
+    print('-' * 20)
+    if pk or 0:
+        order_type = int(request.GET.get('type'))
+        print(type(order_type))
+        if not order_type:
+            raise ValueError('\'order_type\' required')
+
+        if order_type == 1:
+            hotel_order = HotelRoomOrder.objects.get(pk=pk)
+            hotel_order_serializer = HotelRoomOrderSerializer(hotel_order)
+            return hotel_order_serializer.data
+
+        elif order_type == 2:
+            accommodation_order = AccommodationOrder.objects.get(pk=pk)
+            accommodation_order_serializer = AccommodationOrderSerializer(accommodation_order)
+            return accommodation_order_serializer.data
+
+    elif not pk:
+        print('*' * 20)
+        user = request.user
+        accommodation_orders = AccommodationOrder.objects.filter(user=user)
+        accommodation_order_serializer = AccommodationOrderSerializer(accommodation_orders, many=True)
+        hotel_orders = HotelRoomOrder.objects.filter(user=user)
+        hotel_orders_serializer = HotelRoomOrderSerializer(hotel_orders, many=True)
+
+    return {'accommodation_orders': accommodation_order_serializer.data,
+            'hotel_orders': hotel_orders_serializer.data}
+
+
+# def redirect_user_for_payed(date_payment):
+#     redirect_to_booking(date_payment)
+
+
+def validate_payment(secure_date):
+    return secure_date

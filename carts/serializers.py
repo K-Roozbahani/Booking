@@ -17,3 +17,4 @@ class HotelRoomOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = HotelRoomDatePrice
         fields = '__all__'
+
