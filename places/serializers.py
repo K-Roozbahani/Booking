@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import (Place, Accommodation, AccommodationRoom, HotelRoom, Location,
-                     Option, LocationType, AccommodationType, RoomType, AccommodationDatePrice)
+                     Option, LocationType, AccommodationType, RoomType, AccommodationDatePrice, HotelRoomDatePrice)
 
 
 class LocationSerializer(serializers.ModelSerializer):
@@ -43,7 +43,6 @@ class OptionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Option
-        fields = ('title', 'is_free', 'price', 'place')
 
 
 class LocationTypeSerializer(serializers.ModelSerializer):
@@ -111,3 +110,9 @@ class AccommodationRoomSerializer(serializers.ModelSerializer):
     class Meta:
         model = AccommodationRoom
         fields = '__all__'
+
+
+class HotelRoomDatePriceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HotelRoomDatePrice
+        fields = ('date', 'is_reserve', 'price',)
