@@ -4,6 +4,8 @@ from django.conf import settings
 redis_cli = Redis(decode_responses=True)
 currency_hash_name = settings.REDIS_CURRENCY_HASH_NAME
 exchange_rate_hash_name = settings.REDIS_EXCHANGE_RATE_HASH_NAME
+
+
 # holidays_hash_name = settings.REDIS_HOLIDAYS_HASH_NAME
 
 
@@ -53,10 +55,11 @@ def get_exchange_rate(currency_from, currency_to):
         key = currency_to + "/" + currency_from
         rate = redis_cli.hget(exchange_rate_hash_name, key)
         if rate:
-            return 1 / float(rate)
+            rate = 1 / float(rate)
+            print(rate)
+            return rate
         else:
             return False
-
 
 # def update_holiday(date, description):
 #     previous_holidays =

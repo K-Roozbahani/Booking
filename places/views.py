@@ -3,6 +3,7 @@ from rest_framework.generics import GenericAPIView, ListAPIView, RetrieveAPIView
 from .models import *
 from .serializers import *
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 
 class AccommodationView(viewsets.ReadOnlyModelViewSet, viewsets.GenericViewSet):
@@ -10,10 +11,16 @@ class AccommodationView(viewsets.ReadOnlyModelViewSet, viewsets.GenericViewSet):
     serializer_class = AccommodationSerialize
 
 
-class HomeView(ListAPIView):
-    queryset = Place.objects.all()
-    serializer_class = PlaceSerializer
-
+class HomeView(APIView):
+    def get(self, request):
+        currencies = ['IRR', 'USD', 'EUR', 'CAD']
+        currency = request.GET.get('currency')
+        print(currency)
+        places = Place.objects.all()
+        serializer = PlaceSerializer(instance=places, many=True)
+        if currency and currency in currency.upper() in currencies:
+            serializer = PlaceSerializer(instance=places, currency=currency, many=True)
+        return Response(serializer.data)
 
 # def test(request):
 #     serializer = AccommodationSerialize(many=True)
