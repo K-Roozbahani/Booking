@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import os
 from pathlib import Path
 from datetime import timedelta
+from decouple import config, Csv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,9 +22,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-bma*%oc(jyu+7@@lx4gpr$kd_0w2p%60rshe3(zl#t(b2ysl97'
-CSRF_TRUSTED_ORIGINS = 'http://*, https://*'
+CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', cast=Csv(), default='http://*')
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', cast=bool, default=True)
 
 ALLOWED_HOSTS = ['*']
 
@@ -88,7 +89,7 @@ redis_path = 'redis://redis:@my-redis.mapsahr-kaveh.svc:6379'
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-        'LOCATION': 'redis://default:wAIFjrYc0SlyvNtPWtOq1Y83jfL3E24d@127.0.0.1:6379',
+        'LOCATION': 'redis://username:wAIFjrYc0SlyvNtPWtOq1Y83jfL3E24d@127.0.0.1:6379',
     }
 }
 
