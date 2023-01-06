@@ -58,7 +58,7 @@ class PlaceOrderBace(OrderBace):
             return False
 
     def get_order_detail(self):
-        detail_data = {'user': self.user.username, 'number_nights': self.number_nights,
+        detail_data = {'user': self.user__username, 'number_nights': self.number_nights,
                        'start_date': self.start_date_reserve, 'end_date': self.end_date_reserve,
                        'price': self.order_price}
         return detail_data
