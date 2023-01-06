@@ -88,7 +88,7 @@ redis_path = 'redis://redis:@my-redis.mapsahr-kaveh.svc:6379'
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-        'LOCATION': 'redis://mapsahr-kaveh:wAIFjrYc0SlyvNtPWtOq1Y83jfL3E24d@127.0.0.1:6379',
+        'LOCATION': 'redis://username:wAIFjrYc0SlyvNtPWtOq1Y83jfL3E24d@127.0.0.1:6379',
     }
 }
 
