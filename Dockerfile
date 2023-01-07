@@ -16,4 +16,4 @@ COPY . /project
 
 RUN mkdir -p logs && mkdir -p /var/log/gunicorn
 
-CMD ["python",gi "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
