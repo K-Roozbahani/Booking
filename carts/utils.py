@@ -1,6 +1,6 @@
-from carts.models import HotelRoomOrder, AccommodationOrder
-from carts.serializers import HotelRoomOrderSerializer, AccommodationOrderSerializer
-from places.models import HotelRoomDatePrice, AccommodationDatePrice, Place, Accommodation
+from carts.models import PlaceOrder
+from carts.serializers import PlaceOrderSerializer
+from places.models import PlaceDatePrice, Place, Accommodation
 from django.db.models import Q
 from django.utils import timezone
 
@@ -22,22 +22,22 @@ def taking_order(request):
     order = None
     serializer = None
     # print(pk, user, start_date, end_date, order_type)
-    if order_type == 1:
-        place = Place.objects.get(pk=pk)
-        date_prices = HotelRoomDatePrice.objects.filter(Q(palce=place), Q(date__gte=start_date), Q(date__lte=end_date))
-        serializer = HotelRoomOrderSerializer
-        order = HotelRoomOrder(place=place, user=user, status=1)
+    # if order_type == 1:
+    #     place = Place.objects.get(pk=pk)
+    #     date_prices = HotelRoomDatePrice.objects.filter(Q(palce=place), Q(date__gte=start_date), Q(date__lte=end_date))
+    #     serializer = HotelRoomOrderSerializer
+    #     order = HotelRoomOrder(place=place, user=user, status=1)
 
-    elif order_type == 2:
+    if order_type == 1:
         # print('-'*10)
         accommodation = Accommodation.objects.get(pk=pk)
         # print('1'*10)
-        date_prices = AccommodationDatePrice.objects.filter(Q(accommodation=accommodation),
-                                                            Q(date__gte=start_date), Q(date__lte=end_date))
+        date_prices = PlaceDatePrice.objects.filter(Q(accommodation=accommodation),
+                                                    Q(date__gte=start_date), Q(date__lte=end_date))
         # print('2'*10)
-        serializer = AccommodationOrderSerializer()
+        serializer = PlaceOrderSerializer()
         # print('3'*10)
-        order = AccommodationOrder(accommodation=accommodation, user=user, status=1)
+        order = PlaceOrder(user=user, status=1)
         # print('4'*10)
 
     order.save()
@@ -66,25 +66,25 @@ def get_all_or_one_order(request, pk=None):
             raise ValueError('\'order_type\' required')
 
         if order_type == 1:
-            hotel_order = HotelRoomOrder.objects.get(pk=pk)
-            hotel_order_serializer = HotelRoomOrderSerializer(hotel_order)
+            hotel_order = PlaceOrder.objects.get(pk=pk)
+            hotel_order_serializer = PlaceOrderSerializer(hotel_order)
             return hotel_order_serializer.data
 
-        elif order_type == 2:
-            accommodation_order = AccommodationOrder.objects.get(pk=pk)
-            accommodation_order_serializer = AccommodationOrderSerializer(accommodation_order)
-            return accommodation_order_serializer.data
+        # elif order_type == 2:
+        #     accommodation_order = AccommodationOrder.objects.get(pk=pk)
+        #     accommodation_order_serializer = AccommodationOrderSerializer(accommodation_order)
+        #     return accommodation_order_serializer.data
 
     elif not pk:
         # print('*' * 20)
         user = request.user
-        accommodation_orders = AccommodationOrder.objects.filter(user=user)
-        accommodation_order_serializer = AccommodationOrderSerializer(accommodation_orders, many=True)
-        hotel_orders = HotelRoomOrder.objects.filter(user=user)
-        hotel_orders_serializer = HotelRoomOrderSerializer(hotel_orders, many=True)
+        accommodation_orders = PlaceOrder.objects.filter(user=user)
+        accommodation_order_serializer = PlaceOrderSerializer(accommodation_orders, many=True)
+        # hotel_orders = HotelRoomOrder.objects.filter(user=user)
+        # hotel_orders_serializer = HotelRoomOrderSerializer(hotel_orders, many=True)
 
-    return {'accommodation_orders': accommodation_order_serializer.data,
-            'hotel_orders': hotel_orders_serializer.data}
+    return {'place_orders': accommodation_order_serializer.data}
+    # 'hotel_orders': hotel_orders_serializer.data}
 
 
 # def redirect_user_for_payed(date_payment):
@@ -101,15 +101,15 @@ def get_object_order(reqeust, pk):
         order_type = int(reqeust.GET.get('type'))
         # print('1'*10)
         if order_type == 1:
-            return HotelRoomOrder.objects.get(pk=pk)
+            return PlaceOrder.objects.get(pk=pk)
 
-        elif order_type == 2:
-            # print('2'*10)
-            return AccommodationOrder.objects.get(pk=pk)
+        # elif order_type == 2:
+        #     # print('2'*10)
+        #     return AccommodationOrder.objects.get(pk=pk)
         # print('3'*10)
     else:
         order_type = int(reqeust.GET.get('type'))
         if order_type == 1:
-            return AccommodationOrder.objects.all()
-        elif order_type == 2:
-            return HotelRoomOrder.objects.all()
+            return Place.objects.all()
+        # elif order_type == 2:
+        #     return HotelRoomOrder.objects.all()

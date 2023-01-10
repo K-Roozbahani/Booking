@@ -2,7 +2,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.db.models import Sum, Count, Max, Min
 from users.models import User
-from places.models import AccommodationDatePrice, Accommodation, Place, HotelRoomDatePrice
+from places.models import PlaceDatePrice, Accommodation, Place
 
 
 class CardManager(models.Manager):
@@ -25,9 +25,14 @@ class OrderBace(models.Model):
         abstract = True
 
 
-class PlaceOrderBace(OrderBace):
+class PlaceOrder(OrderBace):
+    date_prices = models.ManyToManyField(PlaceDatePrice,
+                                         related_name='place_orders', verbose_name=_('date price'))
+
     class Meta:
-        abstract = True
+        db_table = 'place_orders'
+        verbose_name = 'place order'
+        verbose_name_plural = 'place orders'
 
     @property
     def number_nights(self):
@@ -36,6 +41,7 @@ class PlaceOrderBace(OrderBace):
     @property
     def order_price(self):
         order_prices_sum = self.date_prices.aggregate(Sum('price'))
+        extra_items_price = self.date_price.aggregate(Sum('extra_price'))
         return order_prices_sum['price_sum']
 
     @property
@@ -63,12 +69,6 @@ class PlaceOrderBace(OrderBace):
                        'price': self.order_price}
         return detail_data
 
-    # def save(self, *args, **kwargs):
-    #     if self.is_free():
-    #         super(PlaceOrderBace, self).save(*args, **kwargs)
-    #     else:
-    #         raise FileExistsError('It is reserved during this period')
-
 
 class Cart(User):
     class Meta:
@@ -87,22 +87,12 @@ class Cart(User):
         return None
 
 
-class AccommodationOrder(PlaceOrderBace):
-    accommodation = models.ForeignKey(Accommodation, models.CASCADE, 'orders', verbose_name=_('accommodation'))
-    date_prices = models.ManyToManyField(AccommodationDatePrice,
-                                         related_name='accommodation_orders', verbose_name=_('date price'))
 
-    class Meta:
-        db_table = 'accommodation_orders'
-        verbose_name = 'accommodation order'
-        verbose_name_plural = 'accommodation orders'
-
-
-class HotelRoomOrder(OrderBace):
-    hotel = models.ForeignKey(Place, models.CASCADE, 'hotel_room_order', verbose_name=_('hotel'))
-    date_prices = models.ManyToManyField(HotelRoomDatePrice, 'hotel_room_orders', verbose_name=_('date prices'))
-
-    class Meta:
-        db_table = 'hotel_room_order'
-        verbose_name = _('hotel room order')
-        verbose_name_plural = _('hotel room orders')
+# class HotelRoomOrder(OrderBace):
+#     hotel = models.ForeignKey(Place, models.CASCADE, 'hotel_room_order', verbose_name=_('hotel'))
+#     date_prices = models.ManyToManyField(HotelRoomDatePrice, 'hotel_room_orders', verbose_name=_('date prices'))
+#
+#     class Meta:
+#         db_table = 'hotel_room_order'
+#         verbose_name = _('hotel room order')
+#         verbose_name_plural = _('hotel room orders')

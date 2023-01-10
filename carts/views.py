@@ -2,9 +2,9 @@ from rest_framework.generics import GenericAPIView, ListAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from .utils import taking_order, reserve_date_price, get_all_or_one_order, validate_payment, get_object_order
-from places.models import HotelRoomDatePrice, AccommodationDatePrice
-from .serializers import HotelRoomOrderSerializer, AccommodationOrderSerializer
-from .models import AccommodationOrder, HotelRoomOrder
+from places.models import PlaceDatePrice
+from .serializers import PlaceOrderSerializer
+from .models import PlaceOrder
 from rest_framework.response import Response
 from rest_framework.status import HTTP_400_BAD_REQUEST
 from rest_framework import status
