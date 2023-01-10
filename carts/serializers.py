@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import PlaceOrder
-from places.serializers import AccommodationDatePriceSerializer, HotelRoomDatePriceSerializer
+from places.serializers import AccommodationDatePriceSerializer
 
 
 class PlaceOrderSerializer(serializers.ModelSerializer):

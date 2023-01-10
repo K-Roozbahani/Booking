@@ -19,13 +19,13 @@ class DateFilterManager(models.Manager):
         next_date = now
         next_date.month += 2
         next_date.day = 1
-        return super(DateFilterManager, self).get_queryset().filter(date__gte=now, date__lt=next_date)
+        return super(DateFilterManager, self).get_queryset().filter(date__gte=now, date__lt=next_date, is_reserve=False)
 
 
 class Holiday(models.Model):
     date = models.DateField(verbose_name=_('date'))
     description = models.CharField(verbose_name=_('description'), default=_('end weak'), max_length=64)
-    last_update = models.DateTimeField(verbose_name=_('last_update'), auto_now=True, is_reserve=False)
+    last_update = models.DateTimeField(verbose_name=_('last_update'), auto_now=True)
     objects = models.Manager()
     holiday_list = DateFilterManager()
 
@@ -283,7 +283,7 @@ class PlaceDatePrice(DatePrice):
     accommodation_number = models.PositiveIntegerField(verbose_name=_('accommodation_number'), default=1)
     accommodation = models.ForeignKey(Accommodation, models.CASCADE, 'date_price', verbose_name=_('accommodation'))
     user = models.ForeignKey(User, models.SET_NULL, blank=True, null=True)
-    person_numbers = models.PositiveIntegerField(verbose_name=_('person number'))
+    person_number = models.PositiveIntegerField(verbose_name=_('person number'))
     extra_price = models.FloatField(verbose_name=_('extra price'), null=True, blank=True)
 
     class Meta:

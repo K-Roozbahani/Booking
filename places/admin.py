@@ -86,9 +86,8 @@ class PlaceDatePriceTabularInline(admin.TabularInline):
 class AccommodationAdmin(admin.ModelAdmin):
     model = Accommodation
     search_fields = ['title']
-    list_display = ['id', 'title', 'base_price', 'place', 'standard_capacity', 'build_size']
-    list_filter = ['owner', 'location_type', 'accommodation_type',
-                   'standard_capacity', 'maximum_capacity']
+    list_display = ['id', 'title', 'base_price', 'place', 'standard_capacity', 'accommodation_size']
+    list_filter = ['accommodation_type', 'standard_capacity', 'maximum_capacity']
     inlines = [AccommodationRoomTabularInline, PlaceDatePriceTabularInline]
 
 
