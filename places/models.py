@@ -237,7 +237,7 @@ class Accommodation(BaseModel):
 
 class AccommodationRoom(BaseModel):
     accommodation = models.ForeignKey(Accommodation, models.CASCADE,
-                                      related_name='room', verbose_name=_('accommodation'),
+                                      related_name='rooms', verbose_name=_('accommodation'),
                                       blank=True, null=True)
     size = models.IntegerField(verbose_name=_('size'), blank=True, null=True)
     description = models.TextField(verbose_name=_('description'), blank=True, null=True)
@@ -283,8 +283,8 @@ class PlaceDatePrice(DatePrice):
     accommodation_number = models.PositiveIntegerField(verbose_name=_('accommodation_number'), default=1)
     accommodation = models.ForeignKey(Accommodation, models.CASCADE, 'date_price', verbose_name=_('accommodation'))
     user = models.ForeignKey(User, models.SET_NULL, blank=True, null=True)
-    person_number = models.PositiveIntegerField(verbose_name=_('person number'))
-    extra_price = models.FloatField(verbose_name=_('extra price'), null=True, blank=True)
+    person_number = models.PositiveIntegerField(verbose_name=_('person number'), null=True, blank=True)
+    extra_price = models.FloatField(verbose_name=_('extra price'), default=0)
 
     class Meta:
         db_table = 'place_date_price'

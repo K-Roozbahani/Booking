@@ -78,7 +78,7 @@ class AccommodationAttributeAdmin(admin.ModelAdmin):
 
 class PlaceDatePriceTabularInline(admin.TabularInline):
     model = PlaceDatePrice
-    fields = ('user', 'date', 'is_reserve', 'price', 'currency', 'person_number', 'extra_price')
+    fields = ('user', 'accommodation_number', 'date', 'is_reserve', 'price', 'currency', 'person_number', 'extra_price')
     extra = 0
 
 

@@ -1,12 +1,12 @@
 from django.urls import path
-from .views import AccommodationView, HomeView
+from .views import PlaceView, HomeView
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
-router.register(r'accommodations', AccommodationView, basename='accommodations')
+router.register(r'', PlaceView, basename='places')
 urlpatterns = [
-    path('', HomeView.as_view(), name='home'),
-    # path('test/', test, name='test')
+    # path('', PlaceView.as_view({'get': 'list'}), name='places'),
+    # path('<int:pk>/', PlaceView.as_view({'get': 'retrieve'}), name='places-retrieve')
 
 ]
 
