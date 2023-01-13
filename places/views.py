@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 
 
 class PlaceView(viewsets.ViewSet):
-    filterset_fields = ['location', 'location_type', 'place_type', 'accommodation']
+    filterset_fields = ['location', 'location_type', 'place_type', 'accommodation', 'final_destination', ]
 
     def list(self, request):
         queryset = Place.objects.all()

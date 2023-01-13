@@ -4,7 +4,7 @@ from django.utils import timezone
 from places.models import BaseModel, Location
 
 
-class Airline(models.Model):
+class Airline(BaseModel):
     title = models.CharField(verbose_name=_('name'), max_length=64)
     logo = models.ImageField(verbose_name=_('logo'), upload_to='airline-logo/')
 
@@ -43,7 +43,7 @@ class Flight(BaseModel):
     source = models.ForeignKey(Airport, models.CASCADE, related_name='flight_source', verbose_name=_('source'))
     destination = models.ForeignKey(Airport, models.CASCADE, related_name='flight_destination',
                                     verbose_name=_('destination'))
-    fly_dateTime = models.DateTimeField(verbose_name=_('fly datetime'))
+    fly_datetime = models.DateTimeField(verbose_name=_('fly datetime'))
     landing_datetime = models.DateTimeField(verbose_name=_('landing datetime'))
     airline = models.ForeignKey(Airline, models.CASCADE, related_name='flight_airline',
                                 verbose_name=_('airline'))
@@ -73,7 +73,7 @@ class AirTravel(BaseModel):
                                 blank=True, null=True, verbose_name=_('stop in'))
     flights = models.ManyToManyField(Flight, related_name='air_travel', verbose_name='flights')
     adults_price = models.FloatField(verbose_name=_('adult_price'))
-    children_price = models.FloatField(verbose_name=_('adult_price'))
+    children_price = models.FloatField(verbose_name=_('children_price'))
     infant_price = models.FloatField(verbose_name=_('infant price'))
     currency = models.CharField(verbose_name=_('currency'), default='IRR', max_length=16)
 
