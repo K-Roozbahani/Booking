@@ -1,6 +1,12 @@
 from rest_framework import serializers
-from .models import AirTravel, Airport
-from places.serializers import LocationSerializer
+from .models import AirTravel, Airport, Airline, Flight, FlightRule
+from places.serializers import LocationSerializer, CurrencyExtraInputSerializer
+
+
+class AirlineSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Airline
+        fields = ('id', 'title', 'logo')
 
 
 class AirportSerializer(serializers.ModelSerializer):
@@ -11,14 +17,59 @@ class AirportSerializer(serializers.ModelSerializer):
         fields = ('id', 'title', 'abbreviated_name', 'location')
 
 
+class FlightRuleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FlightRule
+        fields = ('id', 'title', 'is_penalty', 'description')
+
+
+class FlightSerializer(serializers.ModelSerializer):
+    source = AirportSerializer()
+    destination = AirportSerializer()
+    airline = AirlineSerializer()
+    carried_by = AirlineSerializer()
+    flight_rules = FlightRuleSerializer(many=True)
+
+    class Meta:
+        model = Flight
+        fields = ('flight_number', 'source', 'destination',
+                  'fly_datetime', 'landing_datetime', 'airline',
+                  'carried_by', 'flight_rules')
+
+
 class AirTravelListSerializer(serializers.ModelSerializer):
     origin = AirportSerializer()
     final_destination = AirportSerializer()
     number_of_flights = serializers.SerializerMethodField()
+    airline = AirlineSerializer()
 
     class Meta:
         model = AirTravel
-        fields = ('is_international_flight', 'origin', 'final_destination', 'number_of_flights')
+        fields = ('id', 'airline', 'is_international_flight', 'origin', 'final_destination', 'number_of_flights',)
 
     def get_number_of_flights(self, obj):
-        return obj.flights.alll().count()
+        return obj.flights.all().count()
+
+
+class AirTravelRetrieveSerializer(CurrencyExtraInputSerializer):
+    origin = AirportSerializer()
+    final_destination = AirportSerializer()
+    airline = AirlineSerializer()
+    flights = FlightSerializer(many=True)
+    adults_price = serializers.SerializerMethodField()
+    children_price = serializers.SerializerMethodField()
+    infant_price = serializers.SerializerMethodField()
+
+    class Meta:
+        model = AirTravel
+        fields = ('id', 'airline', 'is_international_flight', 'origin', 'final_destination','flight_time',
+                  'stop_time', 'stop_in', 'flights', 'adults_price', 'children_price', 'infant_price', 'currency')
+
+    def get_adults_price(self, obj):
+        return obj.adults_price * self.get_exchange_rate(obj)
+
+    def get_children_price(self, obj):
+        return obj.children_price * self.get_exchange_rate(obj)
+
+    def get_infant_price(self, obj):
+        return obj.infant_price * self.get_exchange_rate(obj)

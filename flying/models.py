@@ -17,11 +17,10 @@ class Airline(BaseModel):
 class Airport(BaseModel):
     title = models.CharField(verbose_name=_('name'), max_length=64)
     location = models.ForeignKey(Location, models.DO_NOTHING, related_name='location', verbose_name=_('location'))
-    abbreviated_name = models.CharField(verbose_name=_('abbreviated name'), max_length=16, default=title)
+    abbreviated_name = models.CharField(verbose_name=_('abbreviated name'), max_length=16)
 
     def __str__(self):
-        return str(self.location__city) + ' (' + str(self.abbreviated_name) + ')'
-
+        return self.abbreviated_name
     class Meta:
         db_table = 'airport'
         verbose_name = _('airport')
@@ -62,11 +61,20 @@ class Flight(BaseModel):
 
 
 class AirTravel(BaseModel):
+    CURRENCY_IRR = 1
+    CURRENCY_USD = 2
+    CURRENCY_EUR = 3
+    CURRENCY_CAD = 4
+    CHOICES_CURRENCY = ((CURRENCY_IRR, 'IRR'), (CURRENCY_USD, 'USD'), (CURRENCY_EUR, 'EUR'), (CURRENCY_CAD, 'CAD'))
     title = None
+    airline = models.ForeignKey(Airline, models.CASCADE, related_name='airline_airline',
+                                verbose_name=_('airline'), null=True, blank=True)
     is_international_flight = models.BooleanField(verbose_name=_('is international flight'))
     origin = models.ForeignKey(Airport, models.CASCADE, 'origin', verbose_name=_('origin'))
     final_destination = models.ForeignKey(Airport, models.CASCADE, 'final_destination',
                                           verbose_name=_('final destination'))
+    fly_datetime = models.DateTimeField(verbose_name=_('fly datetime'), blank=True, null=True)
+
     flight_time = models.TimeField(verbose_name=_('flight time'), null=True, blank=True)
     stop_time = models.TimeField(verbose_name=_('stop time'), null=True, blank=True)
     stop_in = models.ForeignKey(Location, models.CASCADE, related_name='air_travel_stop',
@@ -75,7 +83,7 @@ class AirTravel(BaseModel):
     adults_price = models.FloatField(verbose_name=_('adult_price'))
     children_price = models.FloatField(verbose_name=_('children_price'))
     infant_price = models.FloatField(verbose_name=_('infant price'))
-    currency = models.CharField(verbose_name=_('currency'), default='IRR', max_length=16)
+    currency = models.PositiveSmallIntegerField(verbose_name=_('currency'), choices=CHOICES_CURRENCY, default=1)
 
     def __str__(self):
         return str(self.final_destination)
