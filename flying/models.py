@@ -134,7 +134,7 @@ class CurrencyExchange(models.Model):
     CURRENCIES_CHOICES = currency_choices()
     currency_from = models.PositiveIntegerField(verbose_name=_('currency from'),
                                                 choices=CURRENCIES_CHOICES, default=1)
-    currency_to = models.PositiveIntegerField(verbose_name=_('currency to'), default=1)
+    currency_to = models.PositiveIntegerField(verbose_name=_('currency to'), choices=CURRENCIES_CHOICES, default=1)
     rate = models.FloatField(verbose_name=_('rate'))
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):

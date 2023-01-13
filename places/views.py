@@ -8,6 +8,8 @@ from rest_framework.views import APIView
 
 
 class PlaceView(viewsets.ViewSet):
+    filterset_fields = ['location', 'location_type', 'place_type', 'accommodation']
+
     def list(self, request):
         queryset = Place.objects.all()
         currency = request.GET.get('currency')
@@ -19,6 +21,13 @@ class PlaceView(viewsets.ViewSet):
         currency = request.GET.get('currency')
         serializer = AccommodationSerialize(instance=queryset, currency=currency)
         return Response(serializer.data)
+
+    # def get_filterset_fields(self):
+    #     if self.action == 'list':
+    #         print('list action')
+    #         return ['location', 'location_type', 'place_type', 'accommodation']
+    #     elif self.action == 'retrieve':
+    #         return ['base_price', 'maximum_capacity', 'standard_capacity', 'attribute']
 
 
 class HomeView(APIView):

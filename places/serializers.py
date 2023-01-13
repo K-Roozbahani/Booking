@@ -16,13 +16,12 @@ class CurrencyExtraInputSerializer(serializers.ModelSerializer):
     def __init__(self, instance=None, currency=None, *args, **kwargs):
         currencies = ['IRR', 'USD', 'EUR', 'CAD']
         super(CurrencyExtraInputSerializer, self).__init__(instance, *args, **kwargs)
-        self.exchange_currency = currency.upper() if currencies in currencies else None
-        self.exchange_rate = self.get_exchange_rate(instance) if instance else 1
+        self.exchange_currency = currency.upper() if currency in currencies else None
 
     def get_exchange_rate(self, obj):
         if self.exchange_currency:
-            currency_from = obj.get_currency_display()
-            currency_to = self.exchange_currency
+            currency_from = self.exchange_currency
+            currency_to = obj.get_currency_display()
             exchange_rate = get_exchange_rate(currency_from, currency_to)
             return exchange_rate
         return 1
@@ -38,12 +37,6 @@ class LocationTypeSerializer(serializers.ModelSerializer):
 
 
 class PlaceSerializer(CurrencyExtraInputSerializer):
-
-    def __init__(self, instance=None, currency=None, *args, **kwargs):
-        currencies = ['IRR', 'USD', 'EUR', 'CAD']
-        super(PlaceSerializer, self).__init__(instance, *args, **kwargs)
-        self.exchange_currency = currency if currencies in currencies else None
-
     location_type = LocationTypeSerializer(many=True)
     place_type = serializers.SerializerMethodField()
     price = serializers.SerializerMethodField()
@@ -58,11 +51,22 @@ class PlaceSerializer(CurrencyExtraInputSerializer):
     def get_place_type(self, obj):
         return obj.get_place_type_display()
 
+    def get_exchange_rate(self, obj):
+
+        try:
+            accommodation = obj.accommodation.all().first()
+            if accommodation:
+                return super(PlaceSerializer, self).get_exchange_rate(accommodation)
+            else:
+                return 1
+        except:
+            return 1
+
     def get_price(self, obj):
         try:
             accommodation = obj.accommodation.all().first()
             if accommodation:
-                return accommodation.base_price * self.exchange_rate
+                return accommodation.base_price * self.get_exchange_rate(obj)
         except:
             return None
 
@@ -84,6 +88,14 @@ class PlaceSerializer(CurrencyExtraInputSerializer):
 #     class Meta:
 #         model = Option
 
+class PlaceRetrieSerializers(serializers.ModelSerializer):
+    location_type = LocationTypeSerializer(many=True)
+    location = LocationSerializer()
+
+    class Meta:
+        model = Place
+        fields = '__all__'
+
 
 class AccommodationTypeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -98,6 +110,7 @@ class RoomTypeSerializer(serializers.ModelSerializer):
 
 
 class AccommodationDatePriceSerializer(CurrencyExtraInputSerializer):
+    currency = serializers.SerializerMethodField()
     price = serializers.SerializerMethodField()
     extra_price = serializers.SerializerMethodField()
 
@@ -106,10 +119,10 @@ class AccommodationDatePriceSerializer(CurrencyExtraInputSerializer):
         fields = ('date', 'is_reserve', 'price', 'currency', 'extra_price')
 
     def get_price(self, obj):
-        return obj.price * self.exchange_rate
+        return obj.price * self.get_exchange_rate(obj)
 
     def get_extra_price(self, obj):
-        return obj.extra_price * self.exchange_rate
+        return obj.extra_price * self.get_exchange_rate(obj)
 
 
 # class AccommodationListSerializer(serializers.ListSerializer):
@@ -124,29 +137,33 @@ class AccommodationDatePriceSerializer(CurrencyExtraInputSerializer):
 
 
 class AccommodationSerialize(CurrencyExtraInputSerializer):
-    place = PlaceSerializer()
-
+    place = PlaceRetrieSerializers()
     accommodation_type = AccommodationTypeSerializer(many=True)
     base_price = serializers.SerializerMethodField()
     extra_person_price = serializers.SerializerMethodField()
     currency = serializers.SerializerMethodField()
-    date_price = AccommodationDatePriceSerializer(many=True)
+    date_price = serializers.SerializerMethodField()
     number_of_rooms = serializers.SerializerMethodField()
 
     class Meta:
         model = Accommodation
-        fields = ('title', 'place', 'base_price', 'extra_person_price', 'standard_capacity',
+        fields = ('title', 'place', 'base_price', 'extra_person_price', 'currency', 'standard_capacity',
                   'maximum_capacity', 'entry_time', 'exit_time', 'area_size', 'accommodation_size', 'is_charter',
                   'accommodation_type', 'number_of_rooms', 'description', 'date_price')
 
     def get_base_price(self, obj):
-        return obj.base_price * self.exchange_rate
+        return obj.base_price * self.get_exchange_rate(obj)
 
     def get_extra_person_price(self, obj):
-        return obj.base_price * self.exchange_rate
+        return obj.base_price * self.get_exchange_rate(obj)
 
     def get_number_of_rooms(self, obj):
         return obj.rooms.all().count()
+
+    def get_date_price(self, obj):
+        date_prices = AccommodationDatePriceSerializer(instance=obj.date_price, currency=self.exchange_currency,
+                                                       many=True)
+        return date_prices.data
 
 
 # class HotelRoomSerializer(serializers.ModelSerializer):
