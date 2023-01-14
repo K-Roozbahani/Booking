@@ -1,7 +1,8 @@
 from django.utils.translation import gettext_lazy as _
 from django.db import models
 from django.utils import timezone
-from places.models import BaseModel, Location
+from places.models import BaseModel, Location, DatePrice
+from users.models import User
 
 
 class Airline(BaseModel):
@@ -21,6 +22,7 @@ class Airport(BaseModel):
 
     def __str__(self):
         return self.abbreviated_name
+
     class Meta:
         db_table = 'airport'
         verbose_name = _('airport')
@@ -120,6 +122,19 @@ class PassengerInformation(models.Model):
         db_table = 'passenger_information'
         verbose_name = _('passenger information')
         verbose_name_plural = _('passengers information')
+
+
+class FlyTicketDatePrice(DatePrice):
+    air_travel = models.ForeignKey(AirTravel, models.CASCADE, related_name='fly_ticket', verbose_name=_('air travel'))
+    passenger = models.ForeignKey(PassengerInformation, models.CASCADE, related_name='fly_ticket',
+                                  verbose_name=_('passenger'), null=True, blank=True)
+    date = models.DateTimeField(verbose_name=_('date'))
+    user = models.ForeignKey(User, models.CASCADE, )
+
+    class Meta:
+        db_table = 'fly ticket'
+        verbose_name = _('fly ticket')
+        verbose_name_plural = _('fly tickets')
 
 
 class Currency(BaseModel):

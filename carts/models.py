@@ -3,6 +3,8 @@ from django.utils.translation import gettext_lazy as _
 from django.db.models import Sum, Count, Max, Min
 from users.models import User
 from places.models import PlaceDatePrice, Accommodation, Place
+from flying.models import AirTravel
+from
 
 
 class CardManager(models.Manager):
@@ -85,8 +87,6 @@ class Cart(User):
     @property
     def unpaid_orders(self):
         return None
-
-
 
 # class HotelRoomOrder(OrderBace):
 #     hotel = models.ForeignKey(Place, models.CASCADE, 'hotel_room_order', verbose_name=_('hotel'))
