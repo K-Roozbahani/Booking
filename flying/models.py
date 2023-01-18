@@ -124,14 +124,16 @@ class PassengerInformation(models.Model):
         verbose_name_plural = _('passengers information')
 
 
-class FlyTicketDatePrice(DatePrice):
+class FlyTicket(DatePrice):
     air_travel = models.ForeignKey(AirTravel, models.CASCADE, related_name='fly_ticket', verbose_name=_('air travel'))
     passenger = models.ForeignKey(PassengerInformation, models.CASCADE, related_name='fly_ticket',
                                   verbose_name=_('passenger'), null=True, blank=True)
-    date = models.DateTimeField(verbose_name=_('date'))
-    user = models.ForeignKey(User, models.CASCADE, )
+    user = models.ForeignKey(User, models.CASCADE, related_name='fly_ticket',
+                             verbose_name=_('user'), null=True, blank=True)
+    seat_number = models.PositiveIntegerField(verbose_name=_('seat_number'))
 
     class Meta:
+        unique_together = ('seat_number', 'air_travel')
         db_table = 'fly ticket'
         verbose_name = _('fly ticket')
         verbose_name_plural = _('fly tickets')
