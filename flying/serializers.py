@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from .models import AirTravel, Airport, Airline, Flight, FlightRule
+
+from users.models import User
+from .models import AirTravel, Airport, Airline, Flight, FlightRule, FlyTicket, PassengerInformation
 from places.serializers import LocationSerializer, CurrencyExtraInputSerializer
 
 
@@ -51,6 +53,23 @@ class AirTravelListSerializer(serializers.ModelSerializer):
         return obj.flights.all().count()
 
 
+class PassengerInformationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PassengerInformation
+        fields = ('first_name', 'last_name', 'gender', 'birthday', 'nationality',
+                  'national_id', 'passport_name', 'passport_expire_date')
+
+
+class FlyTicketSerializer(CurrencyExtraInputSerializer):
+    passenger = PassengerInformation()
+    user = serializers.PrimaryKeyRelatedField(read_only=False, queryset=User.objects.get())
+
+    class Meta:
+        model = FlyTicket
+        fields = ('air_travel', 'passenger', 'date', 'user', 'is_reserve', 'price', 'currency')
+
+
+
 class AirTravelRetrieveSerializer(CurrencyExtraInputSerializer):
     origin = AirportSerializer()
     final_destination = AirportSerializer()
@@ -62,7 +81,7 @@ class AirTravelRetrieveSerializer(CurrencyExtraInputSerializer):
 
     class Meta:
         model = AirTravel
-        fields = ('id', 'airline', 'is_international_flight', 'origin', 'final_destination','flight_time',
+        fields = ('id', 'airline', 'is_international_flight', 'origin', 'final_destination', 'flight_time',
                   'stop_time', 'stop_in', 'flights', 'adults_price', 'children_price', 'infant_price', 'currency')
 
     def get_adults_price(self, obj):
