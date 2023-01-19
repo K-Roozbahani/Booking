@@ -5,6 +5,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from users.models import User
+from .abstract_models import AbstractComment, AbstractRate
 
 CURRENCY_IRR = 1
 CURRENCY_USD = 2
@@ -303,10 +304,27 @@ class PlaceDatePrice(DatePrice):
         else:
             return True
 
-# class HotelRoomDatePrice(DatePrice):
-#     room = models.ForeignKey(HotelRoom, models.CASCADE, 'date_price', verbose_name=_('accommodation'))
-#
-#     class Meta:
-#         db_table = 'hotel_room_date_price'
-#         verbose_name = _('hotel room date price')
-#         verbose_name_plural = _('hotel rooms dates price')
+
+class PlaceComment(AbstractComment):
+    place = models.ForeignKey(Place, on_delete=models.CASCADE, related_name="hotel_comment", verbose_name=_('place'))
+
+    def __str__(self):
+        return f"{self.user}: {self.comment_body}"
+
+    class Meta:
+        db_table = 'place_comment'
+        verbose_name = _('place comment')
+        verbose_name_plural = _('place comments')
+
+
+class PlaceRate(AbstractRate):
+    place = models.ForeignKey(Place, related_name='rate', on_delete=models.CASCADE, verbose_name=_('place'))
+
+    def __str__(self):
+        return f'{self.user}: {self.rate}'
+
+    class Meta:
+        unique_together = ('place', 'user')
+        db_table = 'place_rate'
+        verbose_name = _('place rate')
+        verbose_name_plural = _('place rates')
