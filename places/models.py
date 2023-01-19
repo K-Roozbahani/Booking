@@ -291,7 +291,7 @@ class PlaceDatePrice(DatePrice):
         verbose_name = _('place date price')
         verbose_name_plural = _('place dates prices')
 
-    def order_check(self):
+    def check_order(self):
         standard_capacity = self.accommodation__standard_capacity
         maximum_capacity = self.accommodation__maximum_capacity
         if self.person_numbers > maximum_capacity:
