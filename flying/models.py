@@ -138,6 +138,19 @@ class FlyTicket(DatePrice):
         verbose_name = _('fly ticket')
         verbose_name_plural = _('fly tickets')
 
+    def check_order(self):
+        if not self.passenger:
+            return None
+
+        if self.passenger.age < 2:
+            print('updated price')
+            self.price = self.air_travel.infant_price
+        elif self.passenger.age < 12:
+            print('updated price')
+            self.price = self.air_travel.children_price
+        else:
+            return None
+
 
 class Currency(BaseModel):
     national_symbol = models.CharField(verbose_name=_('national symbol'), max_length=8, unique=True)
