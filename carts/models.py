@@ -35,18 +35,18 @@ class PlaceItem(models.Model):
         verbose_name = 'place item'
         verbose_name_plural = 'place items'
 
-        def get_price(self):
-            currency_to = self.order.get_currency_display()
-            items = self.items.all()
-            price = 0
-            for item in items:
-                currency_from = item.get_currency_display()
-                exchange_rate = 1 if currency_from == currency_to else get_exchange_rate(currency_from, currency_to)
-                item.check_order()
-                item_price = (item.extra_price + item.price) * exchange_rate
-                price += item_price
+    def get_price(self):
+        currency_to = self.order.get_currency_display()
+        items = self.items.all()
+        price = 0
+        for item in items:
+            currency_from = item.get_currency_display()
+            exchange_rate = 1 if currency_from == currency_to else get_exchange_rate(currency_from, currency_to)
+            item.check_order()
+            item_price = (item.extra_price + item.price) * exchange_rate
+            price += item_price
 
-            return price
+        return price
 
 
 class FlyItem(models.Model):

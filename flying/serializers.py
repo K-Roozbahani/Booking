@@ -62,7 +62,7 @@ class PassengerInformationSerializer(serializers.ModelSerializer):
 
 class FlyTicketSerializer(CurrencyExtraInputSerializer):
     passenger = PassengerInformation()
-    user = serializers.PrimaryKeyRelatedField(read_only=False, queryset=User.objects.get())
+    user = serializers.PrimaryKeyRelatedField(read_only=False, queryset=User.objects.all())
 
     class Meta:
         model = FlyTicket
