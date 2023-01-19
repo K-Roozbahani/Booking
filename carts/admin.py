@@ -1,14 +1,23 @@
 from django.contrib import admin
-from .models import PlaceOrder
+from models import Order, PlaceItem, FlyItem
 
 
-@admin.register(PlaceOrder)
-class PlaceOrderAdmin(admin.ModelAdmin):
-    model = PlaceOrder
-    search_fields = ['user__username', 'create_date']
-    list_filter = ['status']
+class PlaceItemTabularInline(admin.TabularInline):
+    model = PlaceItem
+    fields = ['is_valid', 'items']
+    extra = 0
 
-# class AccommodationOrderAdmin(admin.ModelAdmin):
-#     model = AccommodationOrder
-#     search_fields = ['user__username', 'create_date']
-#     list_filter = ['status']
+
+class FlyItemTabularInline(admin.TabularInline):
+    model = FlyItem
+    fields = ['is_valid', 'items']
+    extra = 0
+
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    model = Order
+    inlines = [PlaceItemTabularInline, FlyItemTabularInline]
+
+
+class
