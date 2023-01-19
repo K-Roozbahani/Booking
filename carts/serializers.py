@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .old_models import PlaceOrder
 from places.serializers import AccommodationDatePriceSerializer
-from models import Order, PlaceItem, FlyItem
+from .models import Order, PlaceItem, FlyItem
 from places.models import PlaceDatePrice
 from flying.models import FlyTicket
 

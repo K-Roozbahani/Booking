@@ -1,5 +1,5 @@
 from django.contrib import admin
-from models import Order, PlaceItem, FlyItem
+from .models import Order, PlaceItem, FlyItem
 
 
 class PlaceItemTabularInline(admin.TabularInline):
