@@ -18,6 +18,3 @@ class FlyItemTabularInline(admin.TabularInline):
 class OrderAdmin(admin.ModelAdmin):
     model = Order
     inlines = [PlaceItemTabularInline, FlyItemTabularInline]
-
-
-class
