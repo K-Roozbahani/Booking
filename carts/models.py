@@ -2,8 +2,9 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.db.models import Sum, Count, Max, Min
 from users.models import User
-from places.models import PlaceDatePrice, Accommodation, Place
+from places.models import PlaceDatePrice, CHOICES_CURRENCY
 from flying.models import FlyTicket
+from utils.redis_utils import get_exchange_rate
 
 
 class Order(models.Model):
@@ -19,6 +20,7 @@ class Order(models.Model):
     created_time = models.DateTimeField(verbose_name=_('created time'), auto_now_add=True)
     updated_time = models.DateTimeField(verbose_name=_('updated time'), auto_now=True)
     total_price = models.FloatField(verbose_name=_('total price'), null=True, blank=True)
+    currency = models.PositiveSmallIntegerField(verbose_name=_('currency'), default=1, choices=CHOICES_CURRENCY)
 
 
 class PlaceItem(models.Model):
@@ -34,13 +36,17 @@ class PlaceItem(models.Model):
         verbose_name_plural = 'place items'
 
         def get_price(self):
-            price = self.items.all().aggregate(Sum('price'))
+            currency_to = self.order.get_currency_display()
             items = self.items.all()
-            extra_price = 0
+            price = 0
             for item in items:
-                item.order_check()
-                extra_price = item.extra_price
-            return price + extra_price
+                currency_from = item.get_currency_display()
+                exchange_rate = 1 if currency_from == currency_to else get_exchange_rate(currency_from, currency_to)
+                item.check_order()
+                item_price = (item.extra_price + item.price) * exchange_rate
+                price += item_price
+
+            return price
 
 
 class FlyItem(models.Model):
@@ -56,4 +62,15 @@ class FlyItem(models.Model):
         verbose_name_plural = 'fly items'
 
     def get_price(self):
-        return self.items.all().aggregate(Sum('price'))
+        currency_to = self.order.get_currency_display()
+        items = self.items.all()
+        price = 0
+        for item in items:
+            currency_from = item.get_currency_display()
+            exchange_rate = 1 if currency_from == currency_to else get_exchange_rate(currency_from, currency_to)
+            item.check_order()
+            item_price = item * exchange_rate
+            price += item_price
+        return price
+
+
