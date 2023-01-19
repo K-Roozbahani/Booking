@@ -8,7 +8,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 
 def otp_generator(*args, **kwargs):
-    return 1234567890
+    return '1234567890'
 
 
 def send_sms_to_user(*args, **kwargs):
@@ -17,7 +17,7 @@ def send_sms_to_user(*args, **kwargs):
 
 class LoginByOtpView(viewsets.ViewSet):
 
-    @action(methods='post', detail=True, url_path='user/login/get_phone_number')
+    @action(methods=['post'], detail=False, url_path='get-phone-number')
     def get_phone_number(self, request):
         if request.data.get('phone'):
             otp = otp_generator()
@@ -27,11 +27,11 @@ class LoginByOtpView(viewsets.ViewSet):
             data = {"error": "phone field required"}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
-        send_sms_to_user.delay(request.data['phone'], otp)
-
+        # send_sms_to_user.delay(request.data['phone'], otp) ---> for use celery task
+        send_sms_to_user(request.data['phone'], otp)
         return Response(data={'phone': request.data.get('phone')}, status=status.HTTP_200_OK)
 
-    @action(methods='post', detail=True, url_path='user/login/get_otp/')
+    @action(methods=['post'], detail=False, url_path='get-otp')
     def get_otp(self, request):
         if request.data.get('phone') and request.data.get('otp'):
             phone = request.data['phone']
@@ -41,9 +41,9 @@ class LoginByOtpView(viewsets.ViewSet):
 
             if user_otp == otp:
                 try:
-                    user = User.objects.get(phone=phone)
+                    user = User.objects.get(phone_number=phone)
                 except User.DoesNotExist:
-                    user = User.objects.create_user(phone=phone)
+                    user = User.objects.create_user(username=phone[1:], phone_number=phone)
 
                 refresh = RefreshToken.for_user(user)
                 context = {

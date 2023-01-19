@@ -4,7 +4,6 @@ from django.core.validators import RegexValidator
 from django.utils.translation import gettext_lazy as _
 
 
-
 class User(AbstractUser):
     message = "Phone number must be entered in the format '+123456789'. Up to 15 digits allowed."
 
