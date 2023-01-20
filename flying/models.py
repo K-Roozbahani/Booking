@@ -1,7 +1,7 @@
 from django.utils.translation import gettext_lazy as _
 from django.db import models
 from django.utils import timezone
-from places.models import BaseModel, Location, DatePrice
+from places.models import BaseModel, Location, DatePrice, CHOICES_CURRENCY
 from users.models import User
 
 
@@ -168,11 +168,9 @@ class Currency(BaseModel):
 
 
 class CurrencyExchange(models.Model):
-    from utils.redis_utils import currency_choices
-    CURRENCIES_CHOICES = currency_choices()
     currency_from = models.PositiveIntegerField(verbose_name=_('currency from'),
-                                                choices=CURRENCIES_CHOICES, default=1)
-    currency_to = models.PositiveIntegerField(verbose_name=_('currency to'), choices=CURRENCIES_CHOICES, default=1)
+                                                choices=CHOICES_CURRENCY, default=1)
+    currency_to = models.PositiveIntegerField(verbose_name=_('currency to'), choices=CHOICES_CURRENCY, default=1)
     rate = models.FloatField(verbose_name=_('rate'))
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
